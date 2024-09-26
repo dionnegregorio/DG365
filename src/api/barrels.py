@@ -32,8 +32,18 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
-    """ """
+
+    #purchase a new small green potion barrel only if the potions 
+    # in inventory is less than 10.
+
+    result = connection.execute(sqlalchemy.text("SELECT * FROM students"))
+    for row in result:
+            print(row)
+
+    
     print(wholesale_catalog)
+         
+    
 
     return [
         {
