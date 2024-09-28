@@ -38,7 +38,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     # if any exists. Offer up for sale in the catalog only the amount 
     # of green potions that actually exist currently in inventory.
 
-    greenpotion = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE num_green_potion"))
+    greenpotion = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE num_green_potions"))
     
     if greenpotion < 10:
          return [
