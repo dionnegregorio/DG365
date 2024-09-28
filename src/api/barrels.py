@@ -34,17 +34,18 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     #purchase a new small green potion barrel only if the potions 
-    #in inventory is less than 10.
+    #in inventory is less than 10.Always mix all available green ml 
+    # if any exists. Offer up for sale in the catalog only the amount 
+    # of green potions that actually exist currently in inventory.
 
-    result = connection.execute(sqlalchemy.text("SELECT * FROM num_green_positons"))
+    greenpotion = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE num_green_potion"))
     
-    if result > 10:
+    if greenpotion < 10:
          return [
         {
-            "sku": "SMALL_RED_BARREL",
+            "sku": "SMALL_GREEN_BARREL",
             "quantity": 1,
         }
-         
     #print(wholesale_catalog)
     
     ]
