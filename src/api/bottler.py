@@ -37,7 +37,7 @@ def get_bottle_plan():
     # Expressed in integers from 1 to 100 that must sum up to 100.
 
     # Initial logic: bottle all barrels into green  potions.
-    result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory, num_green_"))
+    result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory, num_green_ml"))
     for row in result:
         print(row)
 
