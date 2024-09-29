@@ -39,7 +39,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     # of green potions that actually exist currently in inventory.
 
     greenpotion = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE num_green_potions"))
-    
+    for row in result:
+       print(row)
+
     if greenpotion < 10:
          return [
         {
