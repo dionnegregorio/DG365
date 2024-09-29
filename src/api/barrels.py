@@ -4,9 +4,6 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 
-with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
-
 router = APIRouter(
     prefix="/barrels",
     tags=["barrels"],
@@ -38,10 +35,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     # if any exists. Offer up for sale in the catalog only the amount 
     # of green potions that actually exist currently in inventory.
 
-    green_potion = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE num_green_potions"))
-    for row in result:
-       print(row)
-
+    with db.engine.begin() as connection:
+        green_potion = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE num_green_potions"))
+    
     gold_total = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE gold"))
 
     if green_potion < 10 and gold_total > 0:
