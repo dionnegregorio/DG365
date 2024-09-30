@@ -34,13 +34,16 @@ def get_bottle_plan():
 
     # Initial logic: bottle all barrels into green  potions.
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory, num_green_ml"))
+        amount = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory"))
 
-    if result != 0:
+    amount_green_potions = amount // 100
+
+
+    if amount != 0:
         return [
             {
                 "potion_type": [0, 100, 0, 0],
-                "quantity": 5,
+                "quantity": amount_green_potions,
             }
         ]
     
