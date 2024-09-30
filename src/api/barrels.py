@@ -36,17 +36,25 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     # of green potions that actually exist currently in inventory.
 
     with db.engine.begin() as connection:
-        green_potion = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE num_green_potions"))
+        green_potion = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar
     
-    gold_total = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory WHERE gold"))
+    gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
-    if green_potion < 10 and gold_total > 0:
-         return [
-        {
-            "sku": "SMALL_GREEN_BARREL",
-            "quantity": 1,
-        }
+
+    for barrel in wholesale_catalog:
+
+        if barrel.sku == "SMALL_GREEN_BARREL" and green_potion < 10:
+            x = gold_total // barrel.price
+            if x <= 0:
+                continue
+            if x > barrel.quantity:
+                x = barrel.quantity
+            return [
+                        {"sku": barrel.sku, "quantity": x}
+                    ]
+                 
+    return []
     #print(wholesale_catalog)
     
-    ]
+    
 
