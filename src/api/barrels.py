@@ -24,6 +24,20 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
+    barrels_amount = 0
+    delivered = [0,0,0,0]
+    
+
+    #save first index of the barrel list for now
+    barrels_amount = barrels_delivered[0].ml_per_barrel * barrels_delivered[barrel].quantity
+    gold_spent = barrels_delivered[0].price * barrels_delivered[barrel].quantity
+  
+
+    with db.engine.begin() as connection:
+        for barrel in barrels_delivered:
+            barrels_delivered_amount= connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + {barrels_amount}"))
+            gold_amount = connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - {gold_spent}"))
+
     return "OK"
 
 # Gets called once a day
