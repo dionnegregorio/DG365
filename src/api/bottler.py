@@ -38,7 +38,6 @@ def get_bottle_plan():
 
     amount_green_potions = amount // 100
 
-
     if amount != 0:
         return [
             {
