@@ -20,6 +20,14 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
+    with db.engine.begin() as connection:
+        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory"))
+        green_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory"))
+
+    for potion in PotionInventory:
+        green_ml = potion.quantity
+
+
     return "OK"
 
 @router.post("/plan")
