@@ -27,8 +27,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     barrels_amount = 0
 
     #save first index of the barrel list for now
-    barrels_amount = barrels_delivered[0].ml_per_barrel * barrels_delivered[barrel].quantity
-    gold_spent = barrels_delivered[0].price * barrels_delivered[barrel].quantity
+    barrels_amount = barrels_delivered[0].ml_per_barrel * barrels_delivered[0].quantity
+    gold_spent = barrels_delivered[0].price * barrels_delivered[0].quantity
   
 
     with db.engine.begin() as connection:
@@ -42,27 +42,28 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
-    #purchase a new small green potion barrel only if the potions 
-    #in inventory is less than 10.Always mix all available green ml 
-    # if any exists. Offer up for sale in the catalog only the amount 
-    # of green potions that actually exist currently in inventory.
+    """purchase a new small green potion barrel only if the potions 
+    in inventory is less than 10.Always mix all available green ml 
+     if any exists. Offer up for sale in the catalog only the amount 
+     of green potions that actually exist currently in inventory."""
+    
 
     with db.engine.begin() as connection:
         green_potion = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar
     
-    gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
+        gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
 
     for barrel in wholesale_catalog:
 
         if barrel.sku == "SMALL_GREEN_BARREL" and green_potion < 10:
-            x = gold_total // barrel.price
-            if x <= 0:
+            can_buy = gold_total // barrel.price
+            if can_buy <= 0:
                 continue
-            if x > barrel.quantity:
-                x = barrel.quantity
+            if can_buy > barrel.quantity:
+                can_buy = barrel.quantity
             return [
-                        {"sku": barrel.sku, "quantity": x}
+                        {"sku": barrel.sku, "quantity": can_buy}
                     ]
                  
     return []
