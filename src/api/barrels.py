@@ -25,8 +25,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
     barrels_amount = 0
-    delivered = [0,0,0,0]
-    
 
     #save first index of the barrel list for now
     barrels_amount = barrels_delivered[0].ml_per_barrel * barrels_delivered[barrel].quantity
