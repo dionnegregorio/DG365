@@ -49,27 +49,33 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     with db.engine.begin() as connection:
         num_green_potion = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar
     
-        gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
+        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
     inventory = {
         "Green_ml" : num_green_potion
-        #"Red_ml" : 
-       #"Blue_ml" : 
-
+        #"Red_ml" : num_red_potion
+       #"Blue_ml" : num_blue_potion
     }
+
+    gold_total = gold.fetchone() 
+
+    print(inventory.get("Green_ml"))
+    print(gold)
+    print(gold_total)
+    
    
     plan = []
 
     for barrel in wholesale_catalog:
 
         if barrel.sku == "SMALL_GREEN_BARREL" and inventory.get("Green_ml") < 10:
-            can_buy = gold_total // barrel.price
-            if can_buy <= 0:
+            amount_can_buy = gold_total // barrel.price
+            if amount_can_buy <= 0:
                 continue
-            if can_buy > barrel.quantity:
-                can_buy = barrel.quantity
-            plan.append({"sku": barrel.sku, "quantity": can_buy})
-    return plan
+            if amount_can_buy > barrel.quantity:
+                amount_can_buy = barrel.quantity
+            plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
+    return plan 
                  
 
     #print(wholesale_catalog)
