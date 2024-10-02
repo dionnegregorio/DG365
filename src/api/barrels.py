@@ -51,8 +51,19 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
-    inventory = {
-        "Green_ml" : num_green_potion.fetchone()
+        if num_green_potion < 10:
+            return [
+                {
+                "sku": "SMALL_GREEN_BARREL",
+                "quantity": 1,
+                }
+            ]
+        print(wholesale_catalog)
+        return []
+    
+
+    """ inventory = {
+        "Green_ml" : num_green_potion 
         #"Red_ml" : num_red_potion
        #"Blue_ml" : num_blue_potion
     }
@@ -73,10 +84,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             if amount_can_buy > barrel.quantity:
                 amount_can_buy = barrel.quantity
             plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
-        return plan 
+        return plan """
                  
 
     #print(wholesale_catalog)
+    
     
     
 
