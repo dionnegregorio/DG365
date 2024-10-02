@@ -18,7 +18,7 @@ class Barrel(BaseModel):
     price: int
 
     quantity: int
-    
+
 @router.post("/deliver/{order_id}")
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
@@ -33,8 +33,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     with db.engine.begin() as connection:
         for barrel in barrels_delivered:
-            barrels_delivered_amount= connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + {barrels_amount}"))
-            gold_amount = connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - {gold_spent}"))
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + {barrels_amount}"))
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - {gold_spent}"))
 
     return "OK"
 
