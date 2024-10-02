@@ -52,7 +52,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
     inventory = {
-        "Green_ml" : num_green_potion
+        "Green_ml" : num_green_potion.fetchone()
         #"Red_ml" : num_red_potion
        #"Blue_ml" : num_blue_potion
     }
