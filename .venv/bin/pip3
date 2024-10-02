@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/Users/dionneerickgregorio/CSC 365 Databases/DG365/.venv/bin/python" "$0" "$@"
+'''exec' "/Users/dionneerickgregorio/CSC 365 Databases/DG365/.venv/bin/python3.12" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re
