@@ -58,7 +58,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
        #"Blue_ml" : num_blue_potion
     }"""
 
-    plan = []
+    plan = {}
 
     for barrel in wholesale_catalog:
         if barrel.sku == "SMALL_GREEN_BARREL" and num_green_potion < 10:
