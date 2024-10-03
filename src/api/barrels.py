@@ -52,24 +52,17 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         num_green_potion = num_green_potion.fetchone()
         gold = gold.fetchone()
 
-
-    inventory = {  
+    """inventory = {  
         "Green_ml" : num_green_potion
         #"Red_ml" : num_red_potion
        #"Blue_ml" : num_blue_potion
-    }
+    }"""
 
-    gold_total = gold.fetchone() 
-
-    print(inventory.get("Green_ml"))
-    print(gold_total)
-    
-   
     plan = []
 
     for barrel in wholesale_catalog:
-        if barrel.sku == "SMALL_GREEN_BARREL" and inventory.get("Green_ml") < 10:
-            amount_can_buy = gold_total // barrel.price
+        if barrel.sku == "SMALL_GREEN_BARREL" and num_green_potion < 10:
+            amount_can_buy = gold // barrel.price
             if amount_can_buy <= 0:
                 continue
             if amount_can_buy > barrel.quantity:
@@ -77,5 +70,4 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
         return plan
                  
-
     print(wholesale_catalog)
