@@ -49,8 +49,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     with db.engine.begin() as connection:
         num_green_potion = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory"))
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory"))  
-        num_green_potion = num_green_potion.fetchone()
-        gold = gold.fetchone()
+        num_green_potion = num_green_potion.first()
+        gold = gold.first()
 
     """inventory = {  
         "Green_ml" : num_green_potion
