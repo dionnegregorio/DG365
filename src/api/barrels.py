@@ -45,6 +45,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     in inventory is less than 10. Always mix all available green ml 
      if any exists. Offer up for sale in the catalog only the amount 
      of green potions that actually exist currently in inventory."""
+    
+    print(wholesale_catalog)
 
     with db.engine.begin() as connection:
         num_green_potion = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory"))
@@ -58,16 +60,17 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
        #"Blue_ml" : num_blue_potion
     }"""
 
-    plan = {}
+    plan = []
 
     for barrel in wholesale_catalog:
         if barrel.sku == "SMALL_GREEN_BARREL" and num_green_potion < 10:
             amount_can_buy = gold // barrel.price
             if amount_can_buy <= 0:
                 continue
-            if amount_can_buy > barrel.quantity:
+            if amount_can_buy >= barrel.quantity:
                 amount_can_buy = barrel.quantity
                 plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
-                return plan
-                 
-    print(wholesale_catalog)
+            else: 
+                plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
+    return plan
+        
