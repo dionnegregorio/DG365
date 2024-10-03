@@ -67,7 +67,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 continue
             if amount_can_buy > barrel.quantity:
                 amount_can_buy = barrel.quantity
-            plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
-        return plan
+                plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
+                return plan
                  
     print(wholesale_catalog)
