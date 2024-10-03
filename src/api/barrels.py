@@ -50,7 +50,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         current_green_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
         gold_total = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
 
-    if current_green_potions < 10 and gold_total >= cost:
+    if current_green_potions < 10:
             return [
                 {
                 "sku": "SMALL_GREEN_BARREL",
