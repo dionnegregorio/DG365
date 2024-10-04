@@ -21,20 +21,19 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     with db.engine.begin() as connection:
-        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar()
+        #green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar()
         green_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
 
-    amount_of_bottles = 0
-    list_of_potions_made = []
 
+    amount_of_bottles = 0
     for potion in PotionInventory:
         if potion.quantity > 0:
-            amount_of_bottles += potion.quantity
-            list_of_potions_made.append(amount_of_bottles)
-
-
+            amount_of_bottles = potion.quantity + green_potions
+            connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = {amount_of_bottles})
 
     return "OK"
+
+
 
 @router.post("/plan")
 def get_bottle_plan():
@@ -48,7 +47,7 @@ def get_bottle_plan():
 
     # Initial logic: bottle all barrels into green  potions.
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory"))
+        result = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar()
 
     result = result // 100
 
@@ -59,7 +58,6 @@ def get_bottle_plan():
                 "quantity": result,
             }
         ]
-    
 
 if __name__ == "__main__":
     print(get_bottle_plan())
