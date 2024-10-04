@@ -25,10 +25,13 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         green_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
 
     amount_of_bottles = 0
+    list_of_potions_made = []
 
     for potion in PotionInventory:
         if potion.quantity > 0:
             amount_of_bottles += potion.quantity
+            list_of_potions_made.append(amount_of_bottles)
+
 
 
     return "OK"
