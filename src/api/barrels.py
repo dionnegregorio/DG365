@@ -26,20 +26,21 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     gold_spent = 0
 
-    #set current quantity of each ml and gold
+    #get current quantity of potion ml and gold
     with db.engine.begin() as connection:
-        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml, FROM global_inventory")).scalar()
-        gold_amount = connection.execute(sqlalchemy.text("SELECT gold FROM gold_bank")).scalar()
+        result = connection.execute(sqlalchemy.text("SELECT num_green_ml, gold FROM global_inventory"))
 
-        
+        for num in result:
+             current_green_ml += result.num_green_ml 
+             current_gold += result.gold
+
         for barrel in barrels_delivered:
             if barrel.sku == "SMALL_GREEN_BARREL":
-                green_ml += barrel.ml_per_barrel * barrel.quantity
-                gold_amount -= barrel.price * barrel.quantity
+                current_green_ml += barrel.ml_per_barrel * barrel.quantity
+                current_gold -= barrel.price * barrel.quantity
 
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml =: green_ml"),
-            {'num_green_ml' : green_ml})
-        connection.execute(sqlalchemy.text("UPDATE gold_bank SET gold =: gold_amount"), {'gold_amount': gold_amount})
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml =: green_ml, gold =: gold_amount"),
+            {'num_green_ml' : current_green_ml, 'gold_amount': current_gold})
 
     return "OK"
 
@@ -54,15 +55,22 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
      of green potions that actually exist currently in inventory."""
     
     print(wholesale_catalog)
+
+    #get number of current green potions
     with db.engine.begin() as connection:
         current_green_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
-        gold_total = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
+        gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
-    if current_green_potions < 10:
+    num_can_buy = 0
+    for barrel in wholesale_catalog:
+            if barrel.sku == "SMALL_GREEN_BARREL":
+                num_can_buy = gold_total / barrel.price
+
+    if current_green_potions < 10 and num_can_buy > 0:
             return [
                 {
                 "sku": "SMALL_GREEN_BARREL",
-                "quantity": 5,
+                "quantity": num_can_buy,
                 }
             ]
     
@@ -103,5 +111,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             else: 
                 barrel_plan.append({"sku": barrel.sku, "quantity": amount_can_buy})
     #return barrel_plan
+
+     for barrel in wholesale_catalog:
+            if barrel.sku == "SMALL_GREEN_BARREL":
+                num_can_buy = gold_total / barrel.price
+
     """
         
