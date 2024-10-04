@@ -28,24 +28,18 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     #set current quantity of each ml and gold
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_green_potions, num_green_ml, gold FROM global_inventory"))
+        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml, FROM global_inventory")).scalar()
+        gold_amount = connection.execute(sqlalchemy.text("SELECT gold FROM gold_bank")).scalar()
+
         
-        row = result.fetchone()
-
-        if row:
-            num_green_ml = row[1]
-            gold = row[2]
-
         for barrel in barrels_delivered:
-            if barrel.sku.upper() == "SMALL_GREEN_BARREL":
-                num_green_ml += barrel.ml_per_barrel * barrel.quantity
-                gold -= barrel.price * barrel.quantity
+            if barrel.sku == "SMALL_GREEN_BARREL":
+                green_ml += barrel.ml_per_barrel * barrel.quantity
+                gold_amount -= barrel.price * barrel.quantity
 
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = {num_green_ml}, gold={gold} WHERE id = 1"),
-        {
-            'num_green_ml' : num_green_ml,
-            'gold': gold
-        })
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml =: green_ml"),
+            {'num_green_ml' : green_ml})
+        connection.execute(sqlalchemy.text("UPDATE gold_bank SET gold =: gold_amount"), {'gold_amount': gold_amount})
 
     return "OK"
 
