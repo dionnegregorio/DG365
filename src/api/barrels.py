@@ -24,26 +24,16 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
-    gold_spent = 0
-
-    #get current quantity of potion ml and gold
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_green_ml, gold FROM global_inventory"))
-
-        for num in result:
-             current_green_ml += result.num_green_ml 
-             current_gold += result.gold
-
-        for barrel in barrels_delivered:
-            if barrel.sku == "SMALL_GREEN_BARREL":
-                current_green_ml += barrel.ml_per_barrel * barrel.quantity
-                current_gold -= barrel.price * barrel.quantity
-
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml =: green_ml, gold =: gold_amount"),
-            {'num_green_ml' : current_green_ml, 'gold_amount': current_gold})
+         for barrel in barrels_delivered:
+              if barrel.sku == "SMALL_GREEN_BARRELS":
+                #get current quantity of num of green ml
+                #update the num of green ml if delivered
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + {barrel.ml_per_barrel * barrel.quantity}"))
+                #update the gold amount. gold = current gold - (barrel price * barrel quantity)
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
 
     return "OK"
-
 
 # Gets called once a day
 @router.post("/plan")
@@ -64,15 +54,18 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     num_can_buy = 0
     for barrel in wholesale_catalog:
             if barrel.sku == "SMALL_GREEN_BARREL":
-                num_can_buy = gold_total / barrel.price
+                num_can_buy = (gold_total / barrel.price)
+                if num_can_buy > barrel.quantity:
+                    num_can_buy = barrel.quantity
+                
 
     if current_green_potions < 10 and num_can_buy > 0:
-            return [
-                {
-                "sku": "SMALL_GREEN_BARREL",
-                "quantity": num_can_buy,
-                }
-            ]
+        return [
+            {
+            "sku": "SMALL_GREEN_BARREL",
+            "quantity": num_can_buy,
+            }
+        ]
     
     print(wholesale_catalog)
 
