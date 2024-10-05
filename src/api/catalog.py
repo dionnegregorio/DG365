@@ -28,6 +28,8 @@ def get_catalog():
             }
         ]
 
+        
+
     #get number of potions in database
 
     #if each potion is less than or equal to 0 return []

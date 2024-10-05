@@ -25,12 +25,15 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
     with db.engine.begin() as connection:
-         for barrel in barrels_delivered:
-              if barrel.sku == "SMALL_GREEN_BARRELS":
-                #get current quantity of num of green ml
-                #update the num of green ml if delivered
+        for barrel in barrels_delivered:
+            if barrel.potion_type == [0,1,0,0]:
                 connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + {barrel.ml_per_barrel * barrel.quantity}"))
-                #update the gold amount. gold = current gold - (barrel price * barrel quantity)
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
+            elif barrel.potion_type == [1,0,0,0]:
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = num_red_ml + {barrel.ml_per_barrel * barrel.quantity}"))
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
+            elif barrel.potion_type == [0,0,1,0]:
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_ml = num_red_ml + {barrel.ml_per_barrel * barrel.quantity}"))
                 connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
 
     return "OK"
@@ -49,25 +52,49 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     #get number of current green potions
     with db.engine.begin() as connection:
         current_green_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
+        current_red_potions = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar()
+        current_blue_potions = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar()
         gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
-    num_can_buy = 0
+    to_buy_list = []
+    num_green_can_buy = 0
+    num_red_can_buy = 0
+    num_blue_can_buy = 0
+
     for barrel in wholesale_catalog:
-            if barrel.sku == "SMALL_GREEN_BARREL":
-                num_can_buy = (gold_total // barrel.price)
-                if num_can_buy >= barrel.quantity:
-                    num_can_buy = barrel.quantity
+        if barrel.sku == "SMALL_GREEN_BARREL":
+            num_green_can_buy = (gold_total // barrel.price)
+            if num_green_can_buy >= barrel.quantity:
+                num_green_can_buy = barrel.quantity
+        if barrel.sku == "SMALL_RED_BARREL":
+            num_red_can_buy = (gold_total // barrel.price)
+            if num_red_can_buy >= barrel.quantity:
+                num_red_can_buy = barrel.quantity
+        if barrel.sku == "SMALL_BLUE_BARREL":
+            num_blue_can_buy = (gold_total // barrel.price)
+            if num_blue_can_buy >= barrel.quantity:
+                num_blue_can_buy = barrel.quantity
                 
-    if current_green_potions < 10 and num_can_buy > 0:
-        return [
-            {
+    if current_green_potions < 10 and num_green_can_buy > 0:
+        to_buy_list.append({
             "sku": "SMALL_GREEN_BARREL",
-            "quantity": num_can_buy,
-            }
-        ]
+            "quantity": num_green_can_buy
+            })
+            
+    if current_red_potions < 10 and num_red_can_buy > 0:
+        to_buy_list.append({
+            "sku": "SMALL_RED_BARREL",
+            "quantity": num_red_can_buy,
+            })
+        
+    if current_blue_potions < 10 and num_blue_can_buy > 0:
+        to_buy_list.append({
+            "sku": "SMALL_BLUE_BARREL",
+            "quantity": num_blue_can_buy,
+            })
     
     print(wholesale_catalog)
 
-    return []
+    return to_buy_list
 
    
