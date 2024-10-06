@@ -87,12 +87,25 @@ def post_visits(visit_id: int, customers: list[Customer]):
     """
     print(customers)
 
-    return "OK"
+    visited = False
+    for customer in customers:
+        visited = True
+    
+    return [{
+        "success": visited,
+    }]
 
+    #return "OK"
 
 @router.post("/")
 def create_cart(new_cart: Customer):
-    """ """
+    """ class Customer(BaseModel):
+    customer_name: str
+    character_class: str
+    level: int"""
+
+    
+
     return {"cart_id": 1}
 
 
