@@ -15,21 +15,19 @@ router = APIRouter(
 def get_inventory():
     """ """
     with db.engine.begin() as connection:
-                gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
-                ml = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory")).scalar()
-                #change query
-                potions = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory")).scalar()
+        #need to query more efficiently 
+        gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
+        green_ml= connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar()
+        red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar()
+        blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar()
+        green_potion = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE sku = 'GREEN'")).scalar()
+        red_potion = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE sku = 'RED'")).scalar()
+        blue_potion = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE sku = 'BLUE'")).scalar()
 
-                ml_total = 0
-                potion_total = 0
+    ml_total = green_ml + red_ml + blue_ml
+    potion_total = green_potion + red_potion + blue_potion 
 
-                for amount in ml:
-                      ml_total += amount
-                for amount in potions:
-                      potion_total += amount
-
-    
-    return {"number_of_potions": potion_total, "ml_in_barrels": ml_total, "gold": gold_total}
+    return {"number_of_potions": ml_total, "ml_in_barrels": potion_total, "gold": gold_total}
 
 # Gets called once a day
 @router.post("/plan")
@@ -40,8 +38,8 @@ def get_capacity_plan():
     """
 
     return {
-        "potion_capacity": 0,
-        "ml_capacity": 0
+        "potion_capacity": 50,
+        "ml_capacity": 10000
         }
 
 class CapacityPurchase(BaseModel):
