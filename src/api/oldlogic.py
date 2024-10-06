@@ -33,3 +33,10 @@
     #return barrel_plan
     """
         
+
+    #for barrel plan old inventory
+"""current_green_potions = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar()
+        current_red_potions = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar()
+        current_blue_potions = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar()
+        gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
+"""
