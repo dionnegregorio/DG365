@@ -29,20 +29,15 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         delivered_in_ml = potion.quantity * 100
         if potion.type == [0,1,0,0]:
             if green_ml >= delivered_in_ml:
-                #change updat to potions catalog
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions + {potion.quantity}"))
+                connection.execute(sqlalchemy.text(f"UPDATE potion_catalog SET quantity = quantity + {potion.quantity} WHERE name = 'Green Potion'"))
                 connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml - {delivered_in_ml}"))
         if potion.type == [1,0,0,0]:
             if red_ml >= delivered_in_ml:
-                                #change updat to potions catalog
-
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = num_green_potions + {potion.quantity}"))
+                connection.execute(sqlalchemy.text(f"UPDATE potion_catalog SET quantity = quantity + {potion.quantity} WHERE name = 'Red Potion'"))
                 connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = num_green_ml - {delivered_in_ml}"))
         if potion.type == [0,0,1,0]:
             if blue_ml >= delivered_in_ml:
-                                #change updat to potions catalog
-
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_potions = num_green_potions + {potion.quantity}"))
+                connection.execute(sqlalchemy.text(f"UPDATE potion_catalog SET quantity = quantity + {potion.quantity} WHERE name = 'Blue Potion'"))
                 connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_ml = num_green_ml - {delivered_in_ml}"))
 
     return "OK"
