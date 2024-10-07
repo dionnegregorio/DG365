@@ -58,9 +58,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
     to_buy_list = []
-    num_green_can_buy = 0
+    """num_green_can_buy = 0
     num_red_can_buy = 0
-    num_blue_can_buy = 0
+    num_blue_can_buy = 0"""
     green_price = 0
     red_price = 0
     blue_price = 0
