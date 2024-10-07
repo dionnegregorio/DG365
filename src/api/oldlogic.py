@@ -40,3 +40,13 @@
         current_blue_potions = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar()
         gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 """
+#barrel plan
+"""num_green_can_buy = 0
+    num_red_can_buy = 0
+    num_blue_can_buy = 0"""
+
+""" num_green_can_buy = (gold_total // barrel.price)
+            if num_green_can_buy > barrel.quantity:
+                num_green_can_buy = barrel.quantity
+            else: 
+                num_green_can_buy = 1"""
