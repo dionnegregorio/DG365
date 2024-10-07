@@ -12,6 +12,7 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
+cart_class
 class search_sort_options(str, Enum):
     customer_name = "customer_name"
     item_sku = "item_sku"
@@ -103,9 +104,16 @@ def create_cart(new_cart: Customer):
     character_class: str
     level: int"""
 
-
-
-    return {"cart_id": 1}
+    new_id = 0 
+    
+    with db.engine.begin() as connection:
+        new_id =  connection.execute(sqlalchemy.text("""
+                                    INSERT INTO carts 
+                                        (id, customer_name, customer_class, level) 
+                                    VALUES (new_id, new_cart.customer_name, new_cart.character_class,new_cart.level)
+                                    """ ))
+        
+    return {"cart_id": new_id}
 
 
 class CartItem(BaseModel):
@@ -116,6 +124,22 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
 
+    global carts 
+
+    if cart_id not in carts:
+        return {"Cart not found"}  
+
+    carts[cart_id]["items"].append({
+        "potion_sku": item_sku,
+        "quantity": cart_item.quantity
+    })
+
+    print(f"item sku: {item_sku}")
+    print(f"quantity: {cart_item.quantity}")
+
+    return {"message": f"Added {cart_item.quantity} of {item_sku} to cart {cart_id}"}
+
+
     return "OK"
 
 
@@ -125,5 +149,15 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
+    total_green = 0
+    total_red = 0
+    total_blue = 0
+
+    green_price = 50
+    red_price = 55
+    blue_price = 60
+    
+
+
 
     return {"total_potions_bought": 1, "total_gold_paid": 50}

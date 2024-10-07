@@ -27,15 +27,23 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     with db.engine.begin() as connection:
         for barrel in barrels_delivered:
             if barrel.potion_type == [0,1,0,0]:
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml + {barrel.ml_per_barrel * barrel.quantity}"))
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
+                connection.execute(sqlalchemy.text(f"""
+                                            UPDATE 
+                                                global_inventory SET num_green_ml = num_green_ml + {barrel.ml_per_barrel * barrel.quantity},
+                                                gold = gold - ({barrel.price * barrel.quantity})
+                                            """))
             elif barrel.potion_type == [1,0,0,0]:
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = num_red_ml + {barrel.ml_per_barrel * barrel.quantity}"))
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
+                connection.execute(sqlalchemy.text(f"""
+                                            UPDATE 
+                                                global_inventory SET num_red_ml = num_red_ml + {barrel.ml_per_barrel * barrel.quantity},
+                                                gold = gold - ({barrel.price * barrel.quantity})
+                                            """))
             elif barrel.potion_type == [0,0,1,0]:
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_ml = num_red_ml + {barrel.ml_per_barrel * barrel.quantity}"))
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold - ({barrel.price * barrel.quantity})"))
-
+                connection.execute(sqlalchemy.text(f"""
+                                            UPDATE 
+                                                global_inventory SET num_blue_ml = num_blue_ml + {barrel.ml_per_barrel * barrel.quantity},
+                                                gold = gold - ({barrel.price * barrel.quantity})
+                                            """))
     return "OK"
 
 # Gets called once a day
@@ -48,10 +56,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
      of green potions that actually exist currently in inventory."""
     
     print(wholesale_catalog)
-
-    current_red_potions = 0
-    current_green_potions = 0
-    current_blue_potions = 0
 
     #get number of current green potions
     with db.engine.begin() as connection:
