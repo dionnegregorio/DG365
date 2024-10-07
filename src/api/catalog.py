@@ -11,19 +11,41 @@ def get_catalog():
     Each unique item combination must have only a single price.
     """
     with db.engine.begin() as connection:
-        potions = connection.execute(sqlalchemy.text("SELECT sku, name, quantity, price, type FROM potion_catalog"))
+        potions = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
+    
 
+    inventory = potions.first()
     potions_for_sale = []
 
-    for potion in potions:
-        if potion.quantity > 0: 
-            potions_for_sale.append({
-                "sku": potion.sku,
-                "name": potion.name,
-                "quantity": potion.quantity,
-                "price": potion.price,
-                "potion_type": potion.type,
+    green = inventory.num_green_potions
+    red = inventory.num_red_potions
+    blue = inventory.num_blue_potions
+
+    if green > 0:
+        potions_for_sale.append({
+                "sku": "GREEN_POTION",
+                "name": "Green Potion",
+                "quantity": green,
+                "price": 50,
+                "potion_type": [0,1,0,0],
             })
+    if red > 0:
+        potions_for_sale.append({
+                "sku": "RED_POTION",
+                "name": "Red Potion",
+                "quantity": red,
+                "price": 55,
+                "potion_type": [1,0,0,0],
+            })
+    if blue > 0:
+        potions_for_sale.append({
+                "sku": "BLUE_POTION",
+                "name": "Blue Potion",
+                "quantity": blue,
+                "price": 60,
+                "potion_type": [0,0,1,0],
+            })
+
     return potions_for_sale
 
     #get number of potions in database

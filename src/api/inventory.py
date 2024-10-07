@@ -15,19 +15,17 @@ router = APIRouter(
 def get_inventory():
     """ """
     with db.engine.begin() as connection:
-        #need to query more efficiently 
-        gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
-        green_ml= connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar()
-        red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar()
-        blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar()
-        green_potion = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE sku = 'GREEN'")).scalar()
-        red_potion = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE sku = 'RED'")).scalar()
-        blue_potion = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE sku = 'BLUE'")).scalar()
+        result = connection.execute(sqlalchemy.text("""
+                                SELECT 
+                                    num_green_ml + num_red_ml + num_blue_ml AS ml_total,
+                                    num_green_potions + num_red_potions + num_blue_potions AS potions_total,
+                                    gold
+                                FROM global_inventory
+                            """))
 
-    ml_total = green_ml + red_ml + blue_ml
-    potion_total = green_potion + red_potion + blue_potion 
+    inventory = result.first()
 
-    return {"number_of_potions": ml_total, "ml_in_barrels": potion_total, "gold": gold_total}
+    return {"number_of_potions": inventory.potions_total, "ml_in_barrels": inventory.ml_total, "gold": inventory.gold}
 
 # Gets called once a day
 @router.post("/plan")
