@@ -49,6 +49,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
     print(wholesale_catalog)
 
+    current_red_potions = 0
+    current_green_potions = 0
+    current_blue_potions = 0
+
     #get number of current green potions
     with db.engine.begin() as connection:
        
@@ -89,5 +93,3 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(wholesale_catalog)
 
     return to_buy_list
-
-   
