@@ -55,41 +55,33 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     #get number of current green potions
     with db.engine.begin() as connection:
-       
-        current_green_potions = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE name = 'Green Potion'")).scalar()
-        current_red_potions = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE name = 'Red Potion'")).scalar()
-        current_blue_potions = connection.execute(sqlalchemy.text("SELECT quantity FROM potion_catalog WHERE name = 'Blue Potion'")).scalar()
-        gold_total = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
+        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
 
+    inventory = result.first()
     to_buy_list = []
+    gold_total = inventory.gold
 
-    #loop to see the num of barrels i can buy
-    for barrel in wholesale_catalog:
-        if barrel.sku == "SMALL_GREEN_BARREL":
-            #green_price = barrel.price
-            if current_green_potions < 10 and gold_total >= barrel.price:
-                gold_total -= barrel.price
-                to_buy_list.append({
-                    "sku": "SMALL_GREEN_BARREL",
-                    "quantity": 1,
-                    })
-        if barrel.sku == "SMALL_RED_BARREL":
-            #red_price = barrel.price
-            if current_red_potions < 10 and gold_total >= barrel.price:
-                gold_total -= barrel.price
-                to_buy_list.append({
-                    "sku": "SMALL_RED_BARREL",
-                    "quantity": 1,
-                    })
-        if barrel.sku == "SMALL_BLUE_BARREL":
-            #blue_price = barrel.price
-            if current_blue_potions < 10 and gold_total >= barrel.price:
-                gold_total -= barrel.price
-                to_buy_list.append({
-                    "sku": "SMALL_BLUE_BARREL",
-                    "quantity": 1,
-                    })
-    
+    if inventory.num_green_potions < 10 and gold_total >= 100:
+        gold_total -= 100
+        to_buy_list.append({
+            "sku": "SMALL_GREEN_BARREL",
+            "quantity": 1,
+            })
+        
+    if inventory.num_red_potions < 10 and gold_total >= 100:
+        gold_total -= 100
+        to_buy_list.append({
+            "sku": "SMALL_RED_BARREL",
+            "quantity": 1,
+            })
+        
+    if inventory.num_blue_potions < 10 and gold_total >= 120:
+        gold_total -= 120
+        to_buy_list.append({
+            "sku": "SMALL_BLUE_BARREL",
+            "quantity": 1,
+            })
+
     print(wholesale_catalog)
 
     return to_buy_list

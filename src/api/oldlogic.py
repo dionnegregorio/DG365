@@ -50,3 +50,30 @@
                 num_green_can_buy = barrel.quantity
             else: 
                 num_green_can_buy = 1"""
+""" #loop to see the num of barrels i can buy
+for barrel in wholesale_catalog:
+    if barrel.sku == "SMALL_GREEN_BARREL":
+        #green_price = barrel.price
+        if inventory.num_green_potions < 10 and gold_total >= barrel.price:
+            gold_total -= barrel.price
+            to_buy_list.append({
+                "sku": "SMALL_GREEN_BARREL",
+                "quantity": 1,
+                })
+    if barrel.sku == "SMALL_RED_BARREL":
+        #red_price = barrel.price
+        if inventory.num_red_potions < 10 and gold_total >= barrel.price:
+            gold_total -= barrel.price
+            to_buy_list.append({
+                "sku": "SMALL_RED_BARREL",
+                "quantity": 1,
+                })
+    if barrel.sku == "SMALL_BLUE_BARREL":
+        #blue_price = barrel.price
+        if inventory.num_blue_potions < 10 and gold_total >= barrel.price:
+            gold_total -= barrel.price
+            to_buy_list.append({
+                "sku": "SMALL_BLUE_BARREL",
+                "quantity": 1,
+                })
+            """
