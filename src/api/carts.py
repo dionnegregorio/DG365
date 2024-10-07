@@ -69,7 +69,6 @@ def search_orders(
         ],
     }
 
-
 class Customer(BaseModel):
     customer_name: str
     character_class: str
@@ -104,7 +103,7 @@ def create_cart(new_cart: Customer):
     character_class: str
     level: int"""
 
-    
+
 
     return {"cart_id": 1}
 
