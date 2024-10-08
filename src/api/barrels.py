@@ -65,32 +65,35 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     to_buy_list = []
     gold_total = inventory.gold
 
-    if inventory.num_green_potions < 10 and gold_total >= 100:
-        gold_total -= 100
-        to_buy_list.append({
-            "sku": "SMALL_GREEN_BARREL",
-            "quantity": 1,
-            })
-    else: 
-        return "NOT ENOUGH GOLD"
-        
-    if inventory.num_red_potions < 10 and gold_total >= 100:
-        gold_total -= 100
-        to_buy_list.append({
-            "sku": "SMALL_RED_BARREL",
-            "quantity": 1,
-            })
-    else: 
-        return "NOT ENOUGH GOLD"
-        
-    if inventory.num_blue_potions < 10 and gold_total >= 120:
-        gold_total -= 120
-        to_buy_list.append({
-            "sku": "SMALL_BLUE_BARREL",
-            "quantity": 1,
-            })
-    else: 
-        return "NOT ENOUGH GOLD"
+
+    for barrel in wholesale_catalog:
+        if barrel.sku == "SMALL_GREEN_POTION":
+            if inventory.num_green_potions < 10 and gold_total >= 100:
+                gold_total -= 100
+                to_buy_list.append({
+                    "sku": "SMALL_GREEN_BARREL",
+                    "quantity": 1,
+                    })
+            else: 
+                return "NOT ENOUGH GOLD"
+        elif barrel.sku == "SMALL_RED_POTION":
+            if inventory.num_red_potions < 10 and gold_total >= 100:
+                gold_total -= 100
+                to_buy_list.append({
+                    "sku": "SMALL_RED_BARREL",
+                    "quantity": 1,
+                    })
+            else: 
+                return "NOT ENOUGH GOLD"
+        elif barrel.sku == "SMALL_BLUE_POTION":
+            if inventory.num_blue_potions < 10 and gold_total >= 120:
+                gold_total -= 120
+                to_buy_list.append({
+                    "sku": "SMALL_BLUE_BARREL",
+                    "quantity": 1,
+                    })
+            else: 
+                return "NOT ENOUGH GOLD"
 
     print(wholesale_catalog)
 
