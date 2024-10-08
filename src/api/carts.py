@@ -4,7 +4,6 @@ from src.api import auth
 from enum import Enum
 import sqlalchemy
 from src import database as db
-from src.api.catalog import CatalogItem
 
 
 router = APIRouter(
@@ -123,9 +122,6 @@ class CartItem(BaseModel):
     quantity: int
 
 
-
-carts = {}
-
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """  Set the quantity for a specific item in the cart.
@@ -179,18 +175,25 @@ class CartCheckout(BaseModel):
 
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
-    """ """
-    total_green = 0
-    total_red = 0
-    total_blue = 0
+    """ input is car id which is an int 
+        and cart chackout which is an object with str vatiable
+    """
 
-    green_price = 50
-    red_price = 55
-    blue_price = 60
-    
-    if cart_id not in carts:
-        return {"error": "Cart not found"}
-    
-    cart = carts[cart_id]
+    #get cart id and its quantity, potion and 
+    with db.engine.begin() as connection:
+        cart = connection.execute(sqlalchemy.text(f"SELECT * FROM carts WHERE cart_id = {cart_id}")).fetchall()
 
-    return {"total_potions_bought": 1, "total_gold_paid": 50}
+    total_price = 0
+    total_quantity = 0
+
+    for cart_column in cart:
+        item_sku = cart_column.item_sku 
+        quantity = cart_column.quantity
+        total_price = connection.execute(sqlalchemy.text(f"SELECT price FROM potion_catalog WHERE sku = '{item_sku}'")).scalar() * quantity
+        total_quantity += quantity
+
+    #update gold, adding total price
+    connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {total_price}"))
+    
+
+    return {"total_potions_bought": total_quantity, "total_gold_paid": total_price}
