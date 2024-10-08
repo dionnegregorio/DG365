@@ -24,7 +24,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
 
     inventory = result.first()
-
+    
     for potion in potions_delivered:
         delivered_in_ml = potion.quantity * 100
         if potion.potion_type == [0,1,0,0]:
