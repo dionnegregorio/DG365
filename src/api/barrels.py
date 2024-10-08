@@ -74,8 +74,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     "sku": "SMALL_GREEN_BARREL",
                     "quantity": 1,
                     })
-            else: 
-                return "NOT ENOUGH GOLD"
         elif barrel.sku == "SMALL_RED_POTION":
             if inventory.num_red_potions < 10 and gold_total >= 100:
                 gold_total -= 100
@@ -83,8 +81,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     "sku": "SMALL_RED_BARREL",
                     "quantity": 1,
                     })
-            else: 
-                return "NOT ENOUGH GOLD"
         elif barrel.sku == "SMALL_BLUE_POTION":
             if inventory.num_blue_potions < 10 and gold_total >= 120:
                 gold_total -= 120
@@ -92,9 +88,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     "sku": "SMALL_BLUE_BARREL",
                     "quantity": 1,
                     })
-            else: 
-                return "NOT ENOUGH GOLD"
-
     print(wholesale_catalog)
 
     return to_buy_list
