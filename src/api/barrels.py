@@ -24,26 +24,39 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
+    #iterate through list of barrels delivered
+    #if green barrel is delivered, deliv_ml = current ml + ml delivered 
+        #payed = price * quantity
+    
+    delivered_green_ml = 0
+    delivered_red_ml = 0
+    delivered_blue_ml = 0
+
+    payed = 0
+
+    for barrel in barrels_delivered:
+        if barrel.sku == "SMALL_GREEN_BARREL":
+            delivered_green_ml += barrel.ml_per_barrel * barrel.quantity
+            payed += barrel.price * barrel.quantity
+        if barrel.sku == "SMALL_RED_BARREL":
+            delivered_red_ml += barrel.ml_per_barrel * barrel.quantity
+            payed += barrel.price * barrel.quantity
+        if barrel.sku == "SMALL_BLUE_BARREL":
+            delivered_blue_ml += barrel.ml_per_barrel * barrel.quantity
+            payed += barrel.price * barrel.quantity
+
+    sql_to_execute = """
+                    UPDATE global_inventory 
+                    SET num_green_ml = num_green_ml + :num_green_ml,
+                        num_red_ml = num_red_ml + :num_red_ml,
+                        num_blue_ml = num_blue_ml + :num_blue_ml,
+                        gold = gold + :payed
+                    """
+    values = {'num_green_ml': delivered_green_ml, 'num_red_ml': delivered_red_ml, 'num_blue_ml': delivered_blue_ml, 'payed': payed}
+
     with db.engine.begin() as connection:
-        for barrel in barrels_delivered:
-            if barrel.potion_type == [0,1,0,0]:
-                connection.execute(sqlalchemy.text(f"""
-                                            UPDATE 
-                                                global_inventory SET num_green_ml = num_green_ml + {barrel.ml_per_barrel * barrel.quantity},
-                                                gold = gold - ({barrel.price * barrel.quantity})
-                                            """))
-            elif barrel.potion_type == [1,0,0,0]:
-                connection.execute(sqlalchemy.text(f"""
-                                            UPDATE 
-                                                global_inventory SET num_red_ml = num_red_ml + {barrel.ml_per_barrel * barrel.quantity},
-                                                gold = gold - ({barrel.price * barrel.quantity})
-                                            """))
-            elif barrel.potion_type == [0,0,1,0]:
-                connection.execute(sqlalchemy.text(f"""
-                                            UPDATE 
-                                                global_inventory SET num_blue_ml = num_blue_ml + {barrel.ml_per_barrel * barrel.quantity},
-                                                gold = gold - ({barrel.price * barrel.quantity})
-                                            """))
+        connection.execute(sqlalchemy.text(sql_to_execute), values)
+
     return "OK"
 
 # Gets called once a day
@@ -64,7 +77,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     inventory = result.first()
     to_buy_list = []
     gold_total = inventory.gold
-
 
     for barrel in wholesale_catalog:
         if barrel.sku == "SMALL_GREEN_POTION":
