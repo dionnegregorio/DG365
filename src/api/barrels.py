@@ -47,12 +47,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     sql_to_execute = """
                     UPDATE global_inventory 
-                    SET num_green_ml = num_green_ml + :num_green_ml,
-                        num_red_ml = num_red_ml + :num_red_ml,
-                        num_blue_ml = num_blue_ml + :num_blue_ml,
-                        gold = gold + :payed
+                    SET num_green_ml = num_green_ml + :green_ml,
+                        num_red_ml = num_red_ml + :red_ml,
+                        num_blue_ml = num_blue_ml + :blue_ml,
+                        gold = gold - :payed
                     """
-    values = {'num_green_ml': delivered_green_ml, 'num_red_ml': delivered_red_ml, 'num_blue_ml': delivered_blue_ml, 'payed': payed}
+    values = {'green_ml': delivered_green_ml, 'red_ml': delivered_red_ml, 'blue_ml': delivered_blue_ml, 'payed': payed}
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)

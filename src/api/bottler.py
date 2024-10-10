@@ -20,23 +20,30 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
-    with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
-
-    inventory = result.first()
+    #for each potion, if green, update inventory set num_green_potions = num_green_potion + potion.quantity
+    
+    deliv_green = 0
+    deliv_red = 0
+    deliv_blue = 0
     
     for potion in potions_delivered:
-        delivered_in_ml = potion.quantity * 100
         if potion.potion_type == [0,1,0,0]:
-            if inventory.num_green_ml >= delivered_in_ml:
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions + {potion.quantity}, num_green_ml = num_green_ml - {delivered_in_ml}"))
-                #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml - {delivered_in_ml}"))
+            deliv_green += potion.quantity
         if potion.potion_type == [1,0,0,0]:
-            if inventory.num_red_ml  >= delivered_in_ml:
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = num_red_potions + {potion.quantity}, num_red_ml = num_red_ml - {delivered_in_ml}"))
+            deliv_red += potion.quantity
         if potion.potion_type == [0,0,1,0]:
-            if inventory.num_green_ml >= delivered_in_ml:
-                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_potions = num_blue_potions + {potion.quantity}, num_blue_ml = num_blue_ml - {delivered_in_ml}"))
+            deliv_blue += potion.quantity 
+
+    sql_to_execute = """
+                    UPDATE global_inventory
+                    SET num_green_potions = num_green_potions + :deliv_green,
+                        num_red_potions = num_red_potions + :deliv_red,
+                        num_blue_potions = num_blue_potions + :deliv_blue
+                    """
+    values = {'deliv_green': deliv_green, 'deliv_red': deliv_red, 'deliv_blue': deliv_blue}
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(sql_to_execute), values)
 
     return "OK"
 

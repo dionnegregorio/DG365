@@ -77,3 +77,17 @@ for barrel in wholesale_catalog:
                 "quantity": 1,
                 })
             """
+
+""" for potion in potions_delivered:
+        delivered_in_ml = potion.quantity * 100
+        if potion.potion_type == [0,1,0,0]:
+            if inventory.num_green_ml >= delivered_in_ml:
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions + {potion.quantity}, num_green_ml = num_green_ml - {delivered_in_ml}"))
+                #connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = num_green_ml - {delivered_in_ml}"))
+        if potion.potion_type == [1,0,0,0]:
+            if inventory.num_red_ml  >= delivered_in_ml:
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = num_red_potions + {potion.quantity}, num_red_ml = num_red_ml - {delivered_in_ml}"))
+        if potion.potion_type == [0,0,1,0]:
+            if inventory.num_green_ml >= delivered_in_ml:
+                connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_potions = num_blue_potions + {potion.quantity}, num_blue_ml = num_blue_ml - {delivered_in_ml}"))
+"""
