@@ -89,7 +89,7 @@ def get_bottle_plan():
             "quantity": blue_can_mix
         }
     )
-    
+    print(f"bottle plan to mix: {to_mix}")
     return to_mix
 
 if __name__ == "__main__":
