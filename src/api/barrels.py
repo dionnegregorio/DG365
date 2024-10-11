@@ -45,7 +45,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             delivered_blue_ml += barrel.ml_per_barrel * barrel.quantity
             payed += barrel.price * barrel.quantity
 
-    sql_to_execute = """
+    sql_to_execute = """ 
                     UPDATE global_inventory 
                     SET num_green_ml = num_green_ml + :green_ml,
                         num_red_ml = num_red_ml + :red_ml,
@@ -79,27 +79,29 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     gold_total = inventory.gold
 
     for barrel in wholesale_catalog:
-        if barrel.sku == "SMALL_GREEN_POTION":
+        if barrel.sku == "SMALL_GREEN_BARREL":
             if inventory.num_green_potions < 10 and gold_total >= 100:
                 gold_total -= 100
                 to_buy_list.append({
                     "sku": "SMALL_GREEN_BARREL",
                     "quantity": 1,
                     })
-        elif barrel.sku == "SMALL_RED_POTION":
+        elif barrel.sku == "SMALL_RED_BARREL":
             if inventory.num_red_potions < 10 and gold_total >= 100:
                 gold_total -= 100
                 to_buy_list.append({
                     "sku": "SMALL_RED_BARREL",
                     "quantity": 1,
                     })
-        elif barrel.sku == "SMALL_BLUE_POTION":
+        elif barrel.sku == "SMALL_BLUE_BARREL":
             if inventory.num_blue_potions < 10 and gold_total >= 120:
                 gold_total -= 120
                 to_buy_list.append({
                     "sku": "SMALL_BLUE_BARREL",
                     "quantity": 1,
                     })
-    print(wholesale_catalog)
+                
+    print(f"catalog: {wholesale_catalog}")
+    print(f"barrels to buy: {to_buy_list}")
 
     return to_buy_list
