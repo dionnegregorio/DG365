@@ -23,31 +23,42 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     #for each potion, if green, update inventory set num_green_potions = num_green_potion + potion.quantity
     
     deliv_green = 0
+    ml_green = 0
     deliv_red = 0
+    ml_red = 0
     deliv_blue = 0
+    ml_blue = 0
     return_statement = []
     
     for potion in potions_delivered:
         if potion.potion_type == [0,100,0,0]:
             deliv_green += potion.quantity
+            ml_green = potion.quantity * 100
             print(f"Delivered {deliv_green} potions")
             return_statement.append(f"Delivered {deliv_green} green potions")
         if potion.potion_type == [100,0,0,0]:
             deliv_red += potion.quantity
+            ml_red = potion.quantity * 100
             print(f"Delivered {deliv_red} potions")
             return_statement.append(f"Delivered {deliv_red} red potions")
         if potion.potion_type == [0,0,100,0]:
             deliv_blue += potion.quantity 
+            ml_blue = potion.quantity * 100
             print(f"Delivered {deliv_blue} potions")
             return_statement.append(f"Delivered {deliv_blue} blue potions")
 
     sql_to_execute = """
                     UPDATE global_inventory
                     SET num_green_potions = num_green_potions + :deliv_green,
+                        num_green_ml = num_green_ml - :ml_green,
                         num_red_potions = num_red_potions + :deliv_red,
-                        num_blue_potions = num_blue_potions + :deliv_blue
+                        num_red_ml = num_red_ml - :ml_red,
+                        num_blue_potions = num_blue_potions + :deliv_blue,
+                        num_blue_ml = num_blue_ml - :ml_blue
                     """
-    values = {'deliv_green': deliv_green, 'deliv_red': deliv_red, 'deliv_blue': deliv_blue}
+    values = {'deliv_green': deliv_green, 'ml_green' : ml_green, 'deliv_red': deliv_red,
+                'ml_red' : ml_red, 'deliv_blue': deliv_blue, 'ml_blue' : ml_blue
+             }
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
