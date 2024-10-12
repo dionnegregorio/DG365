@@ -25,17 +25,21 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     deliv_green = 0
     deliv_red = 0
     deliv_blue = 0
+    return_statement = []
     
     for potion in potions_delivered:
         if potion.potion_type == [0,100,0,0]:
             deliv_green += potion.quantity
             print(f"Delivered {deliv_green} potions")
+            return_statement.append(f"Delivered {deliv_green} green potions")
         if potion.potion_type == [100,0,0,0]:
             deliv_red += potion.quantity
             print(f"Delivered {deliv_red} potions")
+            return_statement.append(f"Delivered {deliv_red} red potions")
         if potion.potion_type == [0,0,100,0]:
             deliv_blue += potion.quantity 
             print(f"Delivered {deliv_blue} potions")
+            return_statement.append(f"Delivered {deliv_blue} blue potions")
 
     sql_to_execute = """
                     UPDATE global_inventory
@@ -48,7 +52,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
-    return "OK"
+    return return_statement
 
 @router.post("/plan")
 def get_bottle_plan():
