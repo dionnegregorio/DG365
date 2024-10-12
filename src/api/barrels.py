@@ -38,12 +38,15 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         if barrel.sku == "SMALL_GREEN_BARREL":
             delivered_green_ml += barrel.ml_per_barrel * barrel.quantity
             payed += barrel.price * barrel.quantity
+            print(f"Added {delivered_green_ml} ml to red inventory and payed {payed} gold")
         if barrel.sku == "SMALL_RED_BARREL":
             delivered_red_ml += barrel.ml_per_barrel * barrel.quantity
             payed += barrel.price * barrel.quantity
+            print(f"Added {delivered_red_ml} ml to green inventory and payed {payed} gold")
         if barrel.sku == "SMALL_BLUE_BARREL":
             delivered_blue_ml += barrel.ml_per_barrel * barrel.quantity
             payed += barrel.price * barrel.quantity
+            print(f"Added {delivered_blue_ml} ml to blue inventory and payed {payed} gold")
 
     sql_to_execute = """ 
                     UPDATE global_inventory 
@@ -57,6 +60,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
+    print(f"Added barrels")
     return "OK"
 
 # Gets called once a day

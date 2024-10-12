@@ -131,13 +131,11 @@ def create_cart(new_cart: Customer):
 class CartItem(BaseModel):
     quantity: int
 
-
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """  Set the quantity for a specific item in the cart.
     If the item exists, it updates the quantity; otherwise, it adds the item.
     """
-
     #inputs are cart_id, item_sku, cart_item 
 
 #class CartItem(BaseModel):
@@ -170,6 +168,8 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
+
+    print(f"Added {cart_item.quantity} to cart")
     return {"success": added}
         
 class CartCheckout(BaseModel):

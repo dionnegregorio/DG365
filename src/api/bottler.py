@@ -27,11 +27,11 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     deliv_blue = 0
     
     for potion in potions_delivered:
-        if potion.potion_type == [0,1,0,0]:
+        if potion.potion_type == [0,100,0,0]:
             deliv_green += potion.quantity
-        if potion.potion_type == [1,0,0,0]:
+        if potion.potion_type == [100,0,0,0]:
             deliv_red += potion.quantity
-        if potion.potion_type == [0,0,1,0]:
+        if potion.potion_type == [0,0,100,0]:
             deliv_blue += potion.quantity 
 
     sql_to_execute = """
