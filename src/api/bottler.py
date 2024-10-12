@@ -29,10 +29,13 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     for potion in potions_delivered:
         if potion.potion_type == [0,100,0,0]:
             deliv_green += potion.quantity
+            print(f"Delivered {deliv_green} potions")
         if potion.potion_type == [100,0,0,0]:
             deliv_red += potion.quantity
+            print(f"Delivered {deliv_red} potions")
         if potion.potion_type == [0,0,100,0]:
             deliv_blue += potion.quantity 
+            print(f"Delivered {deliv_blue} potions")
 
     sql_to_execute = """
                     UPDATE global_inventory
