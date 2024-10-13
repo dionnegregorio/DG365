@@ -111,7 +111,7 @@ def create_cart(new_cart: Customer):
 
     sql_to_execute = """
                     INSERT INTO carts 
-                        (id, customer_name, customer_class, level) 
+                        (cart_id, customer_name, customer_class, level) 
                      VALUES
                         (:id_count, :customer_name, :character_class, :level)
                     """
@@ -177,7 +177,7 @@ class CartCheckout(BaseModel):
 
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
-    """ input is car id which is an int 
+    """ input is cart id which is an int 
         and cart chackout which is an object with str vatiable
     """
     #get cart id and its quantity, potion and 
