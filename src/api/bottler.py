@@ -62,6 +62,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
+        connection.execute(sqlalchemy.text("""
+                                           UPDATE catalog 
+                                           SET deliv_green
+                                           """))
 
     return return_statement
 
