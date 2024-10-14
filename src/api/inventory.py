@@ -25,7 +25,7 @@ def get_inventory():
 
     inventory = result.first()
 
-    print(f"Total potions: {inventory.potions.total}, total ml: {inventory.ml_total}, total gold: {inventory.gold}")
+    print(f"Total potions: {inventory.potions_total}, total ml: {inventory.ml_total}, total gold: {inventory.gold}")
     return {"number_of_potions": inventory.potions_total, "ml_in_barrels": inventory.ml_total, "gold": inventory.gold}
 
 # Gets called once a day

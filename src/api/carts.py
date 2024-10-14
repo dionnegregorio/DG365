@@ -165,10 +165,6 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         values.append({'item_sku': item_sku, 'quantity': cart_item.quantity, 'cart_id': cart_id})
         added = True
 
-    with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(sql_to_execute), values)
-
-
     print(f"Added {cart_item.quantity} to cart")
     return {"success": added}
         
@@ -178,23 +174,47 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ input is cart id which is an int 
-        and cart chackout which is an object with str vatiable
+        and cart checkout which is an object with str variable
     """
+    
     #get cart id and its quantity, potion and 
     with db.engine.begin() as connection:
-        cart = connection.execute(sqlalchemy.text(f"SELECT * FROM carts WHERE cart_id = {cart_id}")).fetchall()
+        cart = connection.execute(sqlalchemy.text("SELECT * FROM carts WHERE cart_id = :cart_id"), {'cart_id': cart_id})
 
+    cart = cart.first()
+    total_quantity = cart.quantity
     total_price = 0
-    total_quantity = 0
 
-    for cart_column in cart:
-        item_sku = cart_column.item_sku 
-        quantity = cart_column.quantity
-        total_price = connection.execute(sqlalchemy.text(f"SELECT price FROM potion_catalog WHERE sku = '{item_sku}'")).scalar() * quantity
-        total_quantity += quantity
+    potion_type = ""
 
-    #update gold, adding total price
-    connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {total_price}"))
+    match cart.item_sku: 
+        case "GREEN":
+            total_price = total_quantity * 50
+            potion_type = "num_green_potions"
+        case "RED":
+            total_price = total_quantity * 55
+            potion_type = "num_red_potions"
+        case "BLUE": 
+            total_price = total_quantity * 60
+            potion_type = "num_blue_potions"
+
+    #update gold and inventory
+ 
+    sql_to_ecexute_update = f"""
+                            UPDATE global_inventory
+                            SET {potion_type} = {potion_type} - carts.quantity, gold = gold + :total_price
+                            FROM carts
+                            WHERE carts.cart_id = cart_id;
+                            """
+
+    with db.engine.begin() as connection:
+            connection.execute(sqlalchemy.text(sql_to_ecexute_update), {'total_price': total_price})
+        
+    """UPDATE catalog
+SET inventory = catalog.inventory - cart_items.quantity
+FROM cart_items
+WHERE catalog.id = cart_items.catalog_id and cart_items.cart_id = :cart_id;"""
+
     
-
+    print(f"total_potions_bought: {total_quantity}, total_gold_paid: {total_price}")
     return {"total_potions_bought": total_quantity, "total_gold_paid": total_price}

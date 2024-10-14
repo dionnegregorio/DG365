@@ -38,15 +38,15 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         if barrel.sku == "SMALL_GREEN_BARREL":
             delivered_green_ml += barrel.ml_per_barrel * barrel.quantity
             payed += barrel.price * barrel.quantity
-            print(f"Added {delivered_green_ml} ml to red inventory and payed {payed} gold")
+            print(f"Added {delivered_green_ml} ml to green inventory and payed {payed}")
         if barrel.sku == "SMALL_RED_BARREL":
             delivered_red_ml += barrel.ml_per_barrel * barrel.quantity
             payed += barrel.price * barrel.quantity
-            print(f"Added {delivered_red_ml} ml to green inventory and payed {payed} gold")
+            print(f"Added {delivered_red_ml} ml to red inventory")
         if barrel.sku == "SMALL_BLUE_BARREL":
             delivered_blue_ml += barrel.ml_per_barrel * barrel.quantity
             payed += barrel.price * barrel.quantity
-            print(f"Added {delivered_blue_ml} ml to blue inventory and payed {payed} gold")
+            print(f"Added {delivered_blue_ml} ml to blue inventory")
 
     sql_to_execute = """ 
                     UPDATE global_inventory 
