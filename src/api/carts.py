@@ -205,10 +205,14 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             SET {potion_type} = {potion_type} - carts.quantity, gold = gold + :total_price
                             FROM carts
                             WHERE carts.cart_id = cart_id;
+
+                            UPDATE carts 
+                            SET payed = 'TRUE'
+                            WHERE cart_id = :cart_id;
                             """
 
     with db.engine.begin() as connection:
-            connection.execute(sqlalchemy.text(sql_to_ecexute_update), {'total_price': total_price})
+            connection.execute(sqlalchemy.text(sql_to_ecexute_update), {'total_price': total_price, 'cart_id': cart_id})
         
     """UPDATE catalog
 SET inventory = catalog.inventory - cart_items.quantity
