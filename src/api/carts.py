@@ -12,9 +12,6 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
-
-id_count = 0
-
 class search_sort_options(str, Enum):
     customer_name = "customer_name"
     item_sku = "item_sku"
@@ -102,9 +99,6 @@ def create_cart(new_cart: Customer):
     character_class: str
     level: int"""
 
-    global id_count
-    id_count += 1
-
     sql_to_execute = """
                     INSERT INTO carts 
                         (customer_name, customer_class, level) 
@@ -122,8 +116,8 @@ def create_cart(new_cart: Customer):
         connection.execute(sqlalchemy.text(sql_to_execute), values)
         cart_id = connection.execute(sqlalchemy.text(f"SELECT id FROM carts WHERE customer_name = {new_cart.customer_name}")
                        
-                       #with cart_id: {id_count},
-    print(f"Created a new cart for customer_name: {new_cart.customer_name}, {new_cart.character_class}, level: {new_cart.level}")
+                       
+    print(f"Created a new cart for {new_cart.customer_name}, class: {new_cart.character_class}, level: {new_cart.level}, cart_id: {cart_id}")
     return {"cart_id": cart_id}
 
 class CartItem(BaseModel):
