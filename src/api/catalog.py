@@ -45,7 +45,9 @@ def get_catalog():
                 "price": 60,
                 "potion_type": [0,0,100,0],
             })
-    print(f"potions for sale: {potions_for_sale}")
+        
+    for entry in potions_for_sale:
+        print(f"potions for sale: {entry['sku']}")
     return potions_for_sale
 
     #get number of potions in database
