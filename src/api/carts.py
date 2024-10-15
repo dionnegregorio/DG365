@@ -88,13 +88,9 @@ def post_visits(visit_id: int, customers: list[Customer]):
     Which customers visited the shop today?
     """
     print(customers)
-
-    visited = False
-    for customer in customers:
-        visited = True
     
     return [{
-        "success": visited,
+        "success": True,
     }]
 
     #return "OK"
@@ -111,12 +107,12 @@ def create_cart(new_cart: Customer):
 
     sql_to_execute = """
                     INSERT INTO carts 
-                        (cart_id, customer_name, customer_class, level) 
+                        (customer_name, customer_class, level) 
                      VALUES
-                        (:id_count, :customer_name, :character_class, :level)
+                        (:customer_name, :character_class, :level)
                     """
     values = {
-        'id_count': id_count,
+        #'id_count': id_count,
         'customer_name': new_cart.customer_name,
         'character_class': new_cart.character_class,
         'level': new_cart.level,
@@ -124,10 +120,11 @@ def create_cart(new_cart: Customer):
     
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
+        cart_id = connection.execute(sqlalchemy.text(f"SELECT id FROM carts WHERE customer_name = {new_cart.customer_name}")
                        
-    print(f"Created a new cart with cart_id: {id_count}, customer_name: {new_cart.customer_name}, {new_cart.character_class}, level: {new_cart.level}")
-    return {"cart_id": id_count}
-
+                       #with cart_id: {id_count},
+    print(f"Created a new cart for customer_name: {new_cart.customer_name}, {new_cart.character_class}, level: {new_cart.level}")
+    return {"cart_id": cart_id}
 
 class CartItem(BaseModel):
     quantity: int
