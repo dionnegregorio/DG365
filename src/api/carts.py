@@ -184,14 +184,14 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     for item in cart_items:
         if item["item_sku"] == "GREEN":
-            green_potions += cart_items["quantity"]
-            total_price += 50 * cart_items["quantity"]
+            green_potions += item["quantity"]
+            total_price += 50 * item["quantity"]
         if item["item_sku"] == "RED":
-            green_potions += cart_items["quantity"]
-            total_price += 50 * cart_items["quantity"]
+            green_potions += item["quantity"]
+            total_price += 50 * item["quantity"]
         if item["item_sku"] == "BLUE":
-            green_potions += cart_items["quantity"]
-            total_price += 50 * cart_items["quantity"]
+            green_potions += item["quantity"]
+            total_price += 50 * item["quantity"]
     
     total_quantity = green_potions + red_potions + blue_potions
 
@@ -210,8 +210,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                                                                         'blue_potions': blue_potions, 'total_price': total_price 
                                                                         })
             
-            connection.execute(sqlalchemy.text(f"""
-                                               DELETE FROM carts WHERE id = {cart_id}
+            connection.execute(sqlalchemy.text(f"""DELETE FROM carts WHERE id = {cart_id};
                                                DELETE FROM cart_items WHERE cart_id = {cart_id}
                                                """))
 
