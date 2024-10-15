@@ -129,8 +129,6 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """
     #inputs are cart_id, item_sku, cart_item 
 
-    added = False
-
     sql_to_execute = """
                     INSERT INTO cart_items
                         (cart_id, item_sku, quantity)
@@ -158,7 +156,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
     print(f"Added {cart_item.quantity} to cart")
-    return {"success": added}
+    return {"success": True}
         
 class CartCheckout(BaseModel):
     payment: str
@@ -172,16 +170,12 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     with db.engine.begin() as connection:
         cart_items = connection.execute(sqlalchemy.text("SELECT cart_id, item_sku, quantity FROM cart_items WHERE cart_id = :cart_id"), {'cart_id': cart_id}).mappings()
 
-    #cart_items = cart_items.first()
     total_price = 0
     green_potions = 0
     red_potions = 0
     blue_potions = 0
-    #total_quantity = green_potions + red_potions + blue_potions
 
-    potion_type = ""
-
-
+    #for each item in a customers cart add the quantity of each potion type and total price and all potion quantity
     for item in cart_items:
         if item["item_sku"] == "GREEN":
             green_potions += item["quantity"]
@@ -195,7 +189,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     
     total_quantity = green_potions + red_potions + blue_potions
 
-
     sql_to_ecexute_update = """
                             UPDATE global_inventory
                             SET num_green_potions = num_green_potions - :green_potions, 
@@ -207,11 +200,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             """
     values = {'green_potions': green_potions, 'red_potions': red_potions, 'blue_potions': blue_potions, 'total_price': total_price, 'id': cart_id}
                                                                         
-
     with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text(sql_to_ecexute_update), values)
-        
-
 
     print(f"total_potions_bought: {total_quantity}, total_gold_paid: {total_price}")
     return {"total_potions_bought": total_quantity, "total_gold_paid": total_price}
