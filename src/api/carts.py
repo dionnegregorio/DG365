@@ -114,7 +114,7 @@ def create_cart(new_cart: Customer):
     
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
-        cart_id = connection.execute(sqlalchemy.text(f"SELECT id FROM carts WHERE customer_name = {new_cart.customer_name}")
+        cart_id = connection.execute(sqlalchemy.text(f"SELECT id FROM carts WHERE customer_name = {new_cart.customer_name}"))
                        
                        
     print(f"Created a new cart for {new_cart.customer_name}, class: {new_cart.character_class}, level: {new_cart.level}, cart_id: {cart_id}")
