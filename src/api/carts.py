@@ -102,8 +102,9 @@ def create_cart(new_cart: Customer):
     sql_to_execute = """
                     INSERT INTO carts 
                         (customer_name, customer_class, level) 
-                     VALUES
+                    VALUES
                         (:customer_name, :character_class, :level)
+                    RETURNING cart_id
                     """
     values = {
         #'id_count': id_count,
@@ -113,10 +114,8 @@ def create_cart(new_cart: Customer):
     }
     
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(sql_to_execute), values)
-        cart_id = connection.execute(sqlalchemy.text(f"SELECT id FROM carts WHERE customer_name = {new_cart.customer_name}"))
-                       
-                       
+        cart_id = connection.execute(sqlalchemy.text(sql_to_execute), values).scalar()
+                         
     print(f"Created a new cart for {new_cart.customer_name}, class: {new_cart.character_class}, level: {new_cart.level}, cart_id: {cart_id}")
     return {"cart_id": cart_id}
 
@@ -130,15 +129,13 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """
     #inputs are cart_id, item_sku, cart_item 
 
-#class CartItem(BaseModel):
-    #quantity: int
-
     added = False
 
     sql_to_execute = """
-                    UPDATE carts 
-                    SET item_sku = :item_sku, quantity = :quantity
-                    WHERE cart_id = :cart_id
+                    INSERT INTO cart_items
+                        (cart_id, item_sku, quantity)
+                    VALUES
+                        (:cart_id, :item_sku, :quantity)
                     """
 
     with db.engine.begin() as connection:
@@ -148,14 +145,17 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     values = []
 
     if item_sku == "GREEN" and cart_item.quantity <= potion_inventory.num_green_potions:
-        values.append({'item_sku': item_sku, 'quantity': cart_item.quantity, 'cart_id': cart_id})
+        values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
         added = True
     elif item_sku == "RED" and cart_item.quantity <= potion_inventory.num_red_potions:
-        values.append({'item_sku': item_sku, 'quantity': cart_item.quantity, 'cart_id': cart_id})
+        values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
         added = True
     elif item_sku == "BLUE" and cart_item.quantity <= potion_inventory.num_blue_potions:
-        values.append({'item_sku': item_sku, 'quantity': cart_item.quantity, 'cart_id': cart_id})
+        values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
         added = True
+
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(sql_to_execute), values)
 
     print(f"Added {cart_item.quantity} to cart")
     return {"success": added}
@@ -168,30 +168,31 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ input is cart id which is an int 
         and cart checkout which is an object with str variable
     """
-    
     #get cart id and its quantity, potion and 
     with db.engine.begin() as connection:
-        cart = connection.execute(sqlalchemy.text("SELECT * FROM carts WHERE cart_id = :cart_id"), {'cart_id': cart_id})
+        cart_items = connection.execute(sqlalchemy.text("SELECT cart_id, item_sku, quantity FROM cart_items WHERE cart_id = :cart_id"), {'cart_id': cart_id}).mappings()
 
-    cart = cart.first()
-    total_quantity = cart.quantity
+    #cart_items = cart_items.first()
     total_price = 0
+    green_potions = 0
+    red_potions = 0
+    blue_potions = 0
+    #total_quantity = green_potions + red_potions + blue_potions
 
     potion_type = ""
 
-    match cart.item_sku: 
-        case "GREEN":
-            total_price = total_quantity * 50
-            potion_type = "num_green_potions"
-        case "RED":
-            total_price = total_quantity * 55
-            potion_type = "num_red_potions"
-        case "BLUE": 
-            total_price = total_quantity * 60
-            potion_type = "num_blue_potions"
 
-    #update gold and inventory
- 
+    for items in cart_items:
+        if cart_items["item_sku"] == "GREEN":
+            green_potions += cart_items["quantity"]
+            total_price += 50 * cart_items["quantity"]
+        if cart_items["item_sku"] == "RED":
+            green_potions += cart_items["quantity"]
+            total_price += 50 * cart_items["quantity"]
+        if cart_items["item_sku"] == "BLUE":
+            green_potions += cart_items["quantity"]
+            total_price += 50 * cart_items["quantity"]
+
     sql_to_ecexute_update = f"""
                             UPDATE global_inventory
                             SET {potion_type} = {potion_type} - carts.quantity, gold = gold + :total_price
@@ -205,12 +206,14 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text(sql_to_ecexute_update), {'total_price': total_price, 'cart_id': cart_id})
-        
+            connection.execute(sqlalchemy.text(f"DELETE FROM carts WHERE id = {cart_id}"))
+
     """UPDATE catalog
 SET inventory = catalog.inventory - cart_items.quantity
 FROM cart_items
 WHERE catalog.id = cart_items.catalog_id and cart_items.cart_id = :cart_id;"""
 
-    
+
     print(f"total_potions_bought: {total_quantity}, total_gold_paid: {total_price}")
     return {"total_potions_bought": total_quantity, "total_gold_paid": total_price}
+
