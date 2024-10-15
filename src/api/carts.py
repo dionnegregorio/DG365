@@ -182,36 +182,38 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     potion_type = ""
 
 
-    for items in cart_items:
-        if cart_items["item_sku"] == "GREEN":
+    for item in cart_items:
+        if item["item_sku"] == "GREEN":
             green_potions += cart_items["quantity"]
             total_price += 50 * cart_items["quantity"]
-        if cart_items["item_sku"] == "RED":
+        if item["item_sku"] == "RED":
             green_potions += cart_items["quantity"]
             total_price += 50 * cart_items["quantity"]
-        if cart_items["item_sku"] == "BLUE":
+        if item["item_sku"] == "BLUE":
             green_potions += cart_items["quantity"]
             total_price += 50 * cart_items["quantity"]
+    
+    total_quantity = green_potions + red_potions + blue_potions
 
-    sql_to_ecexute_update = f"""
+
+    sql_to_ecexute_update = """
                             UPDATE global_inventory
-                            SET {potion_type} = {potion_type} - carts.quantity, gold = gold + :total_price
-                            FROM carts
-                            WHERE carts.cart_id = cart_id;
-
-                            UPDATE carts 
-                            SET payed = 'TRUE'
-                            WHERE cart_id = :cart_id;
+                            SET num_green_potions = num_green_potions - :green_potions, 
+                                num_red_potions = num_red_potions - :red_potions,
+                                num_blue_potions = num_blue_potions - :blue_potions,
+                                gold = gold + :total_price
                             """
 
     with db.engine.begin() as connection:
-            connection.execute(sqlalchemy.text(sql_to_ecexute_update), {'total_price': total_price, 'cart_id': cart_id})
-            connection.execute(sqlalchemy.text(f"DELETE FROM carts WHERE id = {cart_id}"))
-
-    """UPDATE catalog
-SET inventory = catalog.inventory - cart_items.quantity
-FROM cart_items
-WHERE catalog.id = cart_items.catalog_id and cart_items.cart_id = :cart_id;"""
+            connection.execute(sqlalchemy.text(sql_to_ecexute_update), {
+                                                                        'green_potions': green_potions, 'red_potions': red_potions,
+                                                                        'blue_potions': blue_potions, 'total_price': total_price 
+                                                                        })
+            
+            connection.execute(sqlalchemy.text(f"""
+                                               DELETE FROM carts WHERE id = {cart_id}
+                                               DELETE FROM cart_items WHERE cart_id = {cart_id}
+                                               """))
 
 
     print(f"total_potions_bought: {total_quantity}, total_gold_paid: {total_price}")
