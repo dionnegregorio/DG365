@@ -34,17 +34,17 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         if potion.potion_type == [0,100,0,0]:
             deliv_green += potion.quantity
             ml_green = potion.quantity * 100
-            print(f"Delivered {deliv_green} potions")
+            print(f"Delivered {deliv_green} green potions")
             return_statement.append(f"Delivered {deliv_green} green potions")
         if potion.potion_type == [100,0,0,0]:
             deliv_red += potion.quantity
             ml_red = potion.quantity * 100
-            print(f"Delivered {deliv_red} potions")
+            print(f"Delivered {deliv_red} red potions")
             return_statement.append(f"Delivered {deliv_red} red potions")
         if potion.potion_type == [0,0,100,0]:
             deliv_blue += potion.quantity 
             ml_blue = potion.quantity * 100
-            print(f"Delivered {deliv_blue} potions")
+            print(f"Delivered {deliv_blue} blue potions")
             return_statement.append(f"Delivered {deliv_blue} blue potions")
 
     sql_to_execute = """
