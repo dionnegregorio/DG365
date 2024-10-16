@@ -131,9 +131,9 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
 
     sql_to_execute = """
                     INSERT INTO cart_items
-                        (cart_id, item_sku, quantity)
+                        (cart_id, item_sku, quantity, potion_type)
                     VALUES
-                        (:cart_id, :item_sku, :quantity)
+                        (:cart_id, :item_sku, :quantity, :potion_type)
                     """
 
     with db.engine.begin() as connection:
@@ -143,11 +143,11 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         values = []
 
         if item_sku == "GREEN_POTION" and cart_item.quantity <= potion_inventory.num_green_potions:
-            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
+            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity, 'potion_type': [0,100,0,0]})
         elif item_sku == "RED_POTION" and cart_item.quantity <= potion_inventory.num_red_potions:
-            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
+            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity, 'potion_type': [100,0,0,0]})
         elif item_sku == "BLUE_POTION" and cart_item.quantity <= potion_inventory.num_blue_potions:
-            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
+            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity, 'potion_type': [0,0,100,0]})
 
     #with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
