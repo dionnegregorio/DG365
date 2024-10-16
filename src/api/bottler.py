@@ -85,6 +85,13 @@ def get_bottle_plan():
     blue_can_mix = ml_inv.num_blue_ml // 100
 
     to_mix = []
+    """
+    get ml inventory from global inventory
+    get abount of red inventory from catalog
+    
+
+
+    """
 
     if green_can_mix > 0:                           
         to_mix.append(

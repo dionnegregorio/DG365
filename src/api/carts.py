@@ -152,7 +152,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     #with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
-    print(f"Added {cart_item.quantity} to cart")
+    print(f"Added {cart_item.quantity} to cart_id {cart_id}")
     return {"success": True}
         
 class CartCheckout(BaseModel):
