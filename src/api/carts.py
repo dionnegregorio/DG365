@@ -196,7 +196,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             DELETE FROM cart_items WHERE cart_id = :id
                             """
     
-    values = {'green_potions': green_potions, 'red_potions': red_potions, 'blue_potions': blue_potions, 'total_price': total_price, 'id': cart_id, 'id': cart_id}
+    values = {'green_potions': green_potions, 'red_potions': red_potions, 'blue_potions': blue_potions, 'total_price': total_price, 'id': cart_id}
                                                                         
     with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text(sql_to_ecexute_update), values)
