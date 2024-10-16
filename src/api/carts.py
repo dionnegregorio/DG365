@@ -174,13 +174,13 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     #for each item in a customers cart add the quantity of each potion type and total price and all potion quantity
     for item in cart_items:
-        if item["item_sku"] == "GREEN":
+        if item["item_sku"] == "GREEN_POTION":
             green_potions += item["quantity"]
             total_price += 50 * item["quantity"]
-        if item["item_sku"] == "RED":
+        elif item["item_sku"] == "RED_POTION":
             red_potions += item["quantity"]
             total_price += 50 * item["quantity"]
-        if item["item_sku"] == "BLUE":
+        elif item["item_sku"] == "BLUE_POTION":
             blue_potions += item["quantity"]
             total_price += 50 * item["quantity"]
     
