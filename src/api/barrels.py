@@ -77,6 +77,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     #get number of current green potions
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
+        
 
     inventory = result.first()
     to_buy_list = []

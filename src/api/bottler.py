@@ -93,6 +93,7 @@ def get_bottle_plan():
                 "quantity": green_can_mix
             }
         )
+
     if red_can_mix > 0:                           
         to_mix.append(
             {
@@ -100,6 +101,7 @@ def get_bottle_plan():
                 "quantity": red_can_mix
             }
         )
+
     if blue_can_mix > 0:                           
         to_mix.append(
         {
@@ -107,6 +109,7 @@ def get_bottle_plan():
             "quantity": blue_can_mix
         }
     )
+        
     print(f"bottle plan to mix: {to_mix}")
     return to_mix
 

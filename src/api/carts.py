@@ -139,20 +139,17 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT num_green_potions, num_red_potions, num_blue_potions FROM global_inventory"))
                                     
-    potion_inventory = result.first()
-    values = []
+        potion_inventory = result.first()
+        values = []
 
-    if item_sku == "GREEN" and cart_item.quantity <= potion_inventory.num_green_potions:
-        values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
-        added = True
-    elif item_sku == "RED" and cart_item.quantity <= potion_inventory.num_red_potions:
-        values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
-        added = True
-    elif item_sku == "BLUE" and cart_item.quantity <= potion_inventory.num_blue_potions:
-        values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
-        added = True
+        if item_sku == "GREEN_POTION" and cart_item.quantity <= potion_inventory.num_green_potions:
+            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
+        elif item_sku == "RED_POTION" and cart_item.quantity <= potion_inventory.num_red_potions:
+            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
+        elif item_sku == "BLUE_POTION" and cart_item.quantity <= potion_inventory.num_blue_potions:
+            values.append({'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
 
-    with db.engine.begin() as connection:
+    #with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
     print(f"Added {cart_item.quantity} to cart")
@@ -198,7 +195,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                             DELETE FROM carts WHERE id = :id;
                             DELETE FROM cart_items WHERE cart_id = :id
                             """
-    values = {'green_potions': green_potions, 'red_potions': red_potions, 'blue_potions': blue_potions, 'total_price': total_price, 'id': cart_id}
+    
+    values = {'green_potions': green_potions, 'red_potions': red_potions, 'blue_potions': blue_potions, 'total_price': total_price, 'id': cart_id, 'id': cart_id}
                                                                         
     with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text(sql_to_ecexute_update), values)
