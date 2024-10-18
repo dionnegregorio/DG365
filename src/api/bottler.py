@@ -82,22 +82,38 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         
         result = connection.execute(sqlalchemy.text("SELECT num_green_ml, num_red_ml, num_blue_ml FROM global_inventory"))
-        potions = connection.execute(sqlalchemy.text("SELECT sku, quantity, type FROM catalog")).fetchall()
+        potions = connection.execute(sqlalchemy.text("SELECT sku, quantity, type FROM catalog ORDER BY id")).mappings.fetchall()
 
     ml_inv = result.first()  
     red_ml = ml_inv.num_red_ml
+    print(red_ml)
     green_can_mix =  ml_inv.num_green_ml // 100
+
     red_can_mix = ml_inv.num_red_ml // 100
+
     blue_can_mix = ml_inv.num_blue_ml // 100
 
     to_mix = []
+
     """
     get ml inventory from global inventory
-    get abount of red inventory from catalog
-
+    get abount of red inventory from catalo
+    """
+    print(f"red ml total: {red_can_mix}")
+    print(f"green bottles can bottle: {green_can_mix}")
+    print(f"blue bottles can bottle:{blue_can_mix}")
 
     """
-    print()
+    get ml inventory for each barrel 
+    for each potion in the catalog 
+        if enough ingredients are available
+        calculate how much you can make with that amount
+        add plan
+    """
+
+    for potion in potions:
+        
+
 
     if red_ml >= 500:
         if potions["sku"] == "RED":
@@ -108,20 +124,11 @@ def get_bottle_plan():
                 }
             )
 
-
     if green_can_mix > 0:                           
         to_mix.append(
             {
                 "potion_type": [0, 100, 0, 0],
                 "quantity": green_can_mix
-            }
-        )
-
-    if red_can_mix > 0:                           
-        to_mix.append(
-            {
-                "potion_type": [100, 0, 0, 0],
-                "quantity": red_can_mix
             }
         )
 
