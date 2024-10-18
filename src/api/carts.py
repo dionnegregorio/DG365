@@ -138,7 +138,8 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT num_green_potions, num_red_potions, num_blue_potions FROM global_inventory"))
-                                    
+        res = connection.execute(sqlalchemy.text("SELECT quantity FROM catalog")).mappings()
+       
         potion_inventory = result.first()
         values = []
 
@@ -166,6 +167,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     #get cart id and its quantity, potion and 
     with db.engine.begin() as connection:
         cart_items = connection.execute(sqlalchemy.text("SELECT cart_id, item_sku, quantity FROM cart_items WHERE cart_id = :cart_id"), {'cart_id': cart_id}).mappings()
+        price = connection.execute(sqlalchemy.text("SELECT price FROM catalog")).mappings()
 
     total_price = 0
     green_potions = 0

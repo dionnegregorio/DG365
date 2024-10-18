@@ -56,6 +56,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                         num_blue_potions = num_blue_potions + :deliv_blue,
                         num_blue_ml = num_blue_ml - :ml_blue
                     """
+    sql_to_exc = """
+                UPDATE catalog 
+                SET quantity
+                """
     values = {'deliv_green': deliv_green, 'ml_green' : ml_green, 'deliv_red': deliv_red,
                 'ml_red' : ml_red, 'deliv_blue': deliv_blue, 'ml_blue' : ml_blue
              }
@@ -78,9 +82,10 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         
         result = connection.execute(sqlalchemy.text("SELECT num_green_ml, num_red_ml, num_blue_ml FROM global_inventory"))
-        potions = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
+        potions = connection.execute(sqlalchemy.text("SELECT sku, quantity, type FROM catalog")).fetchall()
 
     ml_inv = result.first()  
+    red_ml = ml_inv.num_red_ml
     green_can_mix =  ml_inv.num_green_ml // 100
     red_can_mix = ml_inv.num_red_ml // 100
     blue_can_mix = ml_inv.num_blue_ml // 100
@@ -90,7 +95,19 @@ def get_bottle_plan():
     get ml inventory from global inventory
     get abount of red inventory from catalog
 
+
     """
+    print()
+
+    if red_ml >= 500:
+        if potions["sku"] == "RED":
+            to_mix.append(
+                {
+                    "potion_type": potions["type"],
+                    "quantity": red_can_mix
+                }
+            )
+
 
     if green_can_mix > 0:                           
         to_mix.append(

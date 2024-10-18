@@ -27,6 +27,10 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     #iterate through list of barrels delivered
     #if green barrel is delivered, deliv_ml = current ml + ml delivered 
         #payed = price * quantity
+
+    with db.engine.begin() as connection:
+        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
+
     
     delivered_green_ml = 0
     delivered_red_ml = 0
@@ -113,7 +117,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     #if num of red potions is less than 5, then buy a small red barrel cost 100gold 5000ml = 5 potions
     #after selling potions,
 
-    if gold_total >= 100 and current_cap > 100:
+    if gold_total <= 0:
+        print("NOT ENOUGH GOLD")
+        return ["NOT ENOUGH GOLD, BUYING NONE"]
+    
+    elif gold_total >= 100 and current_cap > 100:
         for barrel in wholesale_catalog:
             if barrel.sku == "SMALL_RED_BARREL" and red_potion < 5:
                     gold_total -= 100 
