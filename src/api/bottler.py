@@ -78,6 +78,7 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         
         result = connection.execute(sqlalchemy.text("SELECT num_green_ml, num_red_ml, num_blue_ml FROM global_inventory"))
+        potions = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).fetchall()
 
     ml_inv = result.first()  
     green_can_mix =  ml_inv.num_green_ml // 100
@@ -88,8 +89,6 @@ def get_bottle_plan():
     """
     get ml inventory from global inventory
     get abount of red inventory from catalog
-    
-
 
     """
 

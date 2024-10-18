@@ -176,13 +176,13 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     for item in cart_items:
         if item["item_sku"] == "GREEN_POTION":
             green_potions += item["quantity"]
-            total_price += 50 * item["quantity"]
+            total_price += 40 * item["quantity"]
         elif item["item_sku"] == "RED_POTION":
             red_potions += item["quantity"]
-            total_price += 50 * item["quantity"]
+            total_price += 40 * item["quantity"]
         elif item["item_sku"] == "BLUE_POTION":
             blue_potions += item["quantity"]
-            total_price += 50 * item["quantity"]
+            total_price += 40 * item["quantity"]
     
     total_quantity = green_potions + red_potions + blue_potions
 
@@ -192,11 +192,15 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                                 num_red_potions = num_red_potions - :red_potions,
                                 num_blue_potions = num_blue_potions - :blue_potions,
                                 gold = gold + :total_price;
+                            INSERT INTO sell_history 
+                                (customer_id, potion_type, name, quantity, amount_payed)
+                            VALUES (:customer_id, :potion_type, :name, :quantity, :amount_payed)
+
                             DELETE FROM carts WHERE id = :id;
                             DELETE FROM cart_items WHERE cart_id = :id
                             """
     
-    values = {'green_potions': green_potions, 'red_potions': red_potions, 'blue_potions': blue_potions, 'total_price': total_price, 'id': cart_id}
+    values = {'green_potions': green_potions, 'red_potions': red_potions, 'blue_potions': blue_potions, 'total_price': total_price, 'id': cart_id, }
                                                                         
     with db.engine.begin() as connection:
             connection.execute(sqlalchemy.text(sql_to_ecexute_update), values)
