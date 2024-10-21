@@ -18,78 +18,82 @@ class PotionInventory(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
-    print(f"potions delievered: {potions_delivered} order_id: {order_id}")
+    print(f"potions to deliver: {potions_delivered} order_id: {order_id}")
 
     #for each potion, if green, update inventory set num_green_potions = num_green_potion + potion.quantity
     
-    deliv_green = 0
-    ml_green = 0
+    ml_green = ml_red = ml_blue = ml_dark = 0
     deliv_red = 0
-    ml_red = 0
+    deliv_green = 0
     deliv_blue = 0
-    ml_blue = 0
+    deliv_purp = 0
+    deliv_yellow = 0
+    deliv_teal = 0
     return_statement = []
     
     for potion in potions_delivered:
-        if potion.potion_type == [0,100,0,0]:
-            deliv_green += potion.quantity
-            ml_green = potion.quantity * 100
-            print(f"Delivered {deliv_green} green potions")
-            return_statement.append(f"Delivered {deliv_green} green potions")
-        if potion.potion_type == [100,0,0,0]:
-            deliv_red += potion.quantity
-            ml_red = potion.quantity * 100
-            print(f"Delivered {deliv_red} red potions")
-            return_statement.append(f"Delivered {deliv_red} red potions")
-        if potion.potion_type == [0,0,100,0]:
-            deliv_blue += potion.quantity 
-            ml_blue = potion.quantity * 100
-            print(f"Delivered {deliv_blue} blue potions")
-            return_statement.append(f"Delivered {deliv_blue} blue potions")
+        print(f"potion: {potion.potion_type}, quantity: {potion.quantity}")
+        print(potion.quantity)
 
-        if potion.potion_type == [50,0,50,0]:
-            deliv_purp += potion.quantity
-            ml_red = potion.quantity * 50
-            ml_blue = potion.quantity * 50
-            print(f"Delivered {deliv_purp} green potions")
-            return_statement.append(f"Delivered {deliv_purp} purple potions")
-        if potion.potion_type == [50,50,0,0]:
-            deliv_yellow += potion.quantity
-            ml_red = potion.quantity * 50
-            ml_green = potion.quantity * 50
-            print(f"Delivered {deliv_yellow} red potions")
-            return_statement.append(f"Delivered {deliv_yellow} yellow potions")
-        if potion.potion_type == [0,50,50,0]:
-            deliv_teal += potion.quantity 
-            ml_blue = potion.quantity * 50
-            ml_green = potion.quantity * 50
-            print(f"Delivered {deliv_teal} teal potions")
-            return_statement.append(f"Delivered {deliv_blue} teal potions")
+        red = potion.potion_type[0] * potion.quantity
+        green = potion.potion_type[1] *  potion.quantity
+        blue = potion.potion_type[2] * potion.quantity
+        #dark = potion.potion_type[3] * potion.quantity
+        
+        match potion.potion_type:
+            case [100,0,0,0]:
+                deliv_red += potion.quantity
+                ml_red += red
+            case [0,100,0,0]:
+                deliv_green += potion.quantity
+                ml_green += green
+            case [0,0,100,0]:
+                deliv_blue += potion.quantity
+                ml_blue += blue   
+            case [50,50,0,0]:
+                deliv_yellow += potion.quantity
+                ml_red += red
+                ml_green += green
+            case [50,0,50,0]:
+                deliv_purp += potion.quantity
+                ml_red += red
+                ml_blue += blue
+            case [0,50,50,0]:
+                deliv_teal += potion.quantity
+                ml_green += green
+                ml_blue += blue
+
 
     sql_to_execute = """
+                    UPDATE catalog
+                    SET quantity = CASE sku
+                        WHEN 'RED' THEN quantity + :deliv_red
+                        WHEN 'GREEN' THEN quantity + :deliv_green
+                        WHEN 'BLUE' THEN quantity + :deliv_blue
+                        WHEN 'YELLOW' THEN quantity + :deliv_yellow
+                        WHEN 'PURPLE' THEN quantity + :deliv_purp
+                        WHEN 'TEAL' THEN quantity + :deliv_teal
+                        ELSE quantity
+                    END
+                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'YELLOW', 'PURPLE', 'TEAL');
+
                     UPDATE global_inventory
-                    SET num_green_potions = num_green_potions + :deliv_green,
+                    SET num_red_ml = num_red_ml - :ml_red,
                         num_green_ml = num_green_ml - :ml_green,
-                        num_red_potions = num_red_potions + :deliv_red,
-                        num_red_ml = num_red_ml - :ml_red,
-                        num_blue_potions = num_blue_potions + :deliv_blue,
                         num_blue_ml = num_blue_ml - :ml_blue
                     """
-    sql_to_exc = """
-                UPDATE catalog 
-                SET quantity 
-                """
-    
-    values = {'deliv_green': deliv_green, 'ml_green' : ml_green, 'deliv_red': deliv_red,
-                'ml_red' : ml_red, 'deliv_blue': deliv_blue, 'ml_blue' : ml_blue
-             }
 
+    values = {'deliv_red': deliv_red, 'deliv_green': deliv_green, 'deliv_blue': deliv_blue,
+                'deliv_yellow': deliv_yellow, 'deliv_purp': deliv_purp, 'deliv_teal': deliv_teal,
+                'ml_red': ml_red , 'ml_green': ml_green, 'ml_blue': ml_blue
+              }
+    
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
-    print(return_statement)
-    return return_statement
+    print(f"delivered: {deliv_red} red, {deliv_green} green, {deliv_blue} blue, {deliv_yellow} yellow, {deliv_purp} purple, {deliv_teal} teal")
 
+    return "successfully delivered"
 
 
 @router.post("/plan")
