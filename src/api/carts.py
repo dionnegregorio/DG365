@@ -185,9 +185,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     
     print(item)
     print(price)
-    cost = price * item[1]
-    print(f"total cost: {cost}")
     quant = item[1]
+    cost = price * quant
+    print(f"total cost: {cost}")
     print(f"total quantity: {quant}")
 
     print(f"total_potions_bought: {quant} {item[0]} potions, total_gold_paid: {cost}")
