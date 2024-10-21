@@ -186,10 +186,12 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     print(item)
     print(price)
     cost = price * item[1]
-    print(cost)
+    print(f"total cost: {cost}")
+    quant = item[1]
+    print(f"total quantity: {quant}")
 
-    print(f"total_potions_bought: {item[1]} {item[0]} potions, total_gold_paid: {cost}")
-    return {"total_potions_bought": {item[1]}, "total_gold_paid": cost}
+    print(f"total_potions_bought: {quant} {item[0]} potions, total_gold_paid: {cost}")
+    return {"total_potions_bought": {quant}, "total_gold_paid": cost}
 
 
 """
