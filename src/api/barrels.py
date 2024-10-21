@@ -119,7 +119,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     if gold_total <= 0:
         print("NOT ENOUGH GOLD")
-        return ["NOT ENOUGH GOLD, BUYING NONE"]
+        return []
     
     elif gold_total >= 100 and current_cap > 100:
         for barrel in wholesale_catalog:
