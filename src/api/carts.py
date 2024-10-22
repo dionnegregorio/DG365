@@ -131,7 +131,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
 
     sql_to_execute = """
                     UPDATE catalog
-                    SET quantity = quantity - :quantity
+                    SET quantity = quantity - :quantity_catalog
                     WHERE sku = :sku;
 
                     INSERT INTO cart_items
@@ -140,7 +140,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
                         (:cart_id, :item_sku, :quantity)
                     """
 
-    values = {'quantity': cart_item.quantity, 'sku': item_sku,'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity}
+    values = {'quantity_catalog': cart_item.quantity, 'sku': item_sku,'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity}
 
 
     with db.engine.begin() as connection:
@@ -148,7 +148,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     #with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
-    print(f"Added {cart_item.quantity} to cart_id {cart_id}")
+    print(f"Added {cart_item.quantity} {item_sku} to cart_id {cart_id}")
     return {"success": True}
         
 class CartCheckout(BaseModel):
@@ -189,7 +189,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     print(sku)
     print(price)
-    
+
     cost = price * quant
     print(f"total cost: {cost}")
     print(f"total quantity: {quant}")
