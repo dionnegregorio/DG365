@@ -180,20 +180,27 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     
     with db.engine.begin() as connection:
-        item = connection.execute(sqlalchemy.text(sql_to_execute), values).fetchone()
-        price = connection.execute(sqlalchemy.text("SELECT price FROM catalog WHERE sku = :sku"), {'sku': item[0]}).scalar()
+        item = connection.execute(sqlalchemy.text(sql_to_execute), values).mappings().fetchone()
+        price = connection.execute(sqlalchemy.text("SELECT price FROM catalog WHERE sku = :sku"), {'sku': item['item_sku']}).scalar()
     
-    print(item)
+    
+    sku = item['item_sku']
+    quant = item['quantity']
+
+    print(sku)
     print(price)
-    quant = item[1]
+    
     cost = price * quant
     print(f"total cost: {cost}")
     print(f"total quantity: {quant}")
 
     
 
-    print(f"total_potions_bought: {quant} {item[0]} potion(s), total_gold_paid: {cost}")
-    return {"total_potions_bought": quant, "total_gold_paid": cost}
+    print(f"total_potions_bought: {quant} {sku} potions, total_gold_paid: {cost}")
+    return {
+        "total_potions_bought": quant, 
+        "total_gold_paid": cost
+    }
 
 
 """
