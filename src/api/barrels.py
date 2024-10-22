@@ -28,14 +28,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     #if green barrel is delivered, deliv_ml = current ml + ml delivered 
         #payed = price * quantity
 
-    with db.engine.begin() as connection:
-        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
-
-    
     delivered_green_ml = 0
     delivered_red_ml = 0
     delivered_blue_ml = 0
-
     payed = 0
 
     for barrel in barrels_delivered:
@@ -81,41 +76,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     #get number of current green potions
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
-        potion_quants = connection.execute(sqlalchemy.text("SELECT sku, quantity FROM catalog WHERE id = '1' OR id = '2' OR id = '3' ORDER BY id")).mappings()
+        #potion_quants = connection.execute(sqlalchemy.text("SELECT sku, quantity FROM catalog WHERE id = '1' OR id = '2' OR id = '3' ORDER BY id")).mappings()
     
     inventory = result.first()
     to_buy_list = []
-    red_potion = 0
-    green_potion = 0
-    blue_potion = 0
+    red_ml = inventory.num_red_ml
+    green_ml = inventory.num_green_ml
+    blue_ml = inventory.num_blue_ml
     gold_total = inventory.gold
 
-    current_ml = inventory.num_green_ml + inventory.num_red_ml + inventory.num_blue_ml
+    current_ml = red_ml + green_ml + blue_ml
     current_cap = inventory.ml_capacity - current_ml
 
     print(gold_total)
     print(current_cap)
 
     #get current amount of red, green and blue potions
-    for column in potion_quants:
-         if column['sku'] == "RED":
-              print(column['sku'])
-              print(column["quantity"])
-              red_potion = column['quantity']
-         if column["sku"] == "GREEN":
-              print(column['sku'])
-              print(column["quantity"])
-              green_potion = column['quantity']
-         if column["sku"] == "BLUE":
-              print(column['sku'])
-              print(column["quantity"])
-              blue_potion = column['quantity']
-
-    print(f"red: {red_potion}, green: {green_potion} , blue: {blue_potion} ")
-
-    #get amount of ml and potion storage i have left
-    #if num of red potions is less than 5, then buy a small red barrel cost 100gold 5000ml = 5 potions
-    #after selling potions,
+    #buy if ml is less than 500ml
 
     if gold_total <= 0:
         print("NOT ENOUGH GOLD")
@@ -123,19 +100,19 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
     elif gold_total >= 100 and current_cap > 100:
         for barrel in wholesale_catalog:
-            if barrel.sku == "SMALL_RED_BARREL" and red_potion < 5 and gold_total >= 100:
-                    gold_total -= 100 
-                    to_buy_list.append({
-                        "sku": "SMALL_RED_BARREL",
-                        "quantity": 1,
-                        })
-            elif barrel.sku == "SMALL_GREEN_BARREL" and green_potion < 5 and gold_total >= 100:
+            if barrel.sku == "SMALL_RED_BARREL" and red_ml < 500 and gold_total >= 100:
+                gold_total -= 100 
+                to_buy_list.append({
+                    "sku": "SMALL_RED_BARREL",
+                    "quantity": 1,
+                    })
+            elif barrel.sku == "SMALL_GREEN_BARREL" and green_ml< 500 and gold_total >= 100:
                     gold_total -= 100
                     to_buy_list.append({
                         "sku": "SMALL_GREEN_BARREL",
                         "quantity": 1,
                         })
-            elif barrel.sku == "SMALL_BLUE_BARREL" and blue_potion < 5 and gold_total >= 120:
+            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 500 and gold_total >= 120:
                     gold_total -= 120
                     to_buy_list.append({
                         "sku": "SMALL_BLUE_BARREL",
@@ -145,3 +122,21 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(f"Barrels to buy: {to_buy_list}")
 
     return to_buy_list
+
+#dont need to reference potion quantity 
+    """
+    for column in potion_quants:
+         if column['sku'] == "RED":
+              print(column['sku'])
+              print(column["quantity"])
+                red_ml
+         = column['quantity']
+         if column["sku"] == "GREEN":
+              print(column['sku'])
+              print(column["quantity"])
+ml= column['quantity']
+         if column["sku"] == "BLUE":
+              print(column['sku'])
+              print(column["quantity"])
+                blue_ml = column['quantity']
+    """
