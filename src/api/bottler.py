@@ -29,7 +29,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     deliv_purp = 0
     deliv_yellow = 0
     deliv_teal = 0
-    return_statement = []
     
     for potion in potions_delivered:
         print(f"potion: {potion.potion_type}, quantity: {potion.quantity}")

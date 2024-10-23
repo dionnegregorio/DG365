@@ -183,7 +183,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         item = connection.execute(sqlalchemy.text(sql_to_execute), values).mappings().fetchone()
         price = connection.execute(sqlalchemy.text("SELECT price FROM catalog WHERE sku = :sku"), {'sku': item['item_sku']}).scalar()
     
-    
     sku = item['item_sku']
     quant = item['quantity']
 
@@ -195,7 +194,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     print(f"total quantity: {quant}")
 
     
-
     print(f"total_potions_bought: {quant} {sku} potions, total_gold_paid: {cost}")
     return {
         "total_potions_bought": quant, 
