@@ -102,25 +102,31 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         for barrel in wholesale_catalog:
             if barrel.sku == "SMALL_RED_BARREL" and red_ml < 1000 and gold_total >= 100:
                 barrels_can_buy = gold_total // barrel.price 
-                gold_total -= (barrels_can_buy * barrel.price)
-                to_buy_list.append({
-                    "sku": "SMALL_RED_BARREL",
-                    "quantity": barrels_can_buy,
-                    })
+                if barrels_can_buy > 10:
+                    barrels_can_buy = 10
+                    gold_total -= (barrels_can_buy * barrel.price)
+                    to_buy_list.append({
+                        "sku": "SMALL_RED_BARREL",
+                        "quantity": barrels_can_buy,
+                        })
             elif barrel.sku == "SMALL_GREEN_BARREL" and green_ml < 1000 and gold_total >= 100:
                 barrels_can_buy = gold_total // barrel.price 
-                gold_total -= (barrels_can_buy * barrel.price)
-                to_buy_list.append({
-                        "sku": "SMALL_GREEN_BARREL",
-                        "quantity": barrels_can_buy,
-                        })
+                if barrels_can_buy > 10:
+                    barrels_can_buy = 10
+                    gold_total -= (barrels_can_buy * barrel.price)
+                    to_buy_list.append({
+                            "sku": "SMALL_GREEN_BARREL",
+                            "quantity": barrels_can_buy,
+                            })
             elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 1000 and gold_total >= 120:
                 barrels_can_buy = gold_total // barrel.price 
-                gold_total -= (barrels_can_buy * barrel.price)
-                to_buy_list.append({
-                        "sku": "SMALL_BLUE_BARREL",
-                        "quantity": barrels_can_buy,
-                        })
+                if barrels_can_buy > 10:
+                    barrels_can_buy = 10
+                    gold_total -= (barrels_can_buy * barrel.price)
+                    to_buy_list.append({
+                            "sku": "SMALL_BLUE_BARREL",
+                            "quantity": barrels_can_buy,
+                            })
 
                       
     print(f"Barrels to buy: {to_buy_list}")
@@ -137,11 +143,14 @@ Barrel(sku='SMALL_GREEN_BARREL', ml_per_barrel=500, potion_type=[0, 1, 0, 0], pr
  Barrel(sku='MINI_GREEN_BARREL', ml_per_barrel=200, potion_type=[0, 1, 0, 0], price=60, quantity=1), 
  Barrel(sku='MINI_BLUE_BARREL', ml_per_barrel=200, potion_type=[0, 0, 1, 0], price=60, quantity=1), 
 
+ 
  Barrel(sku='LARGE_DARK_BARREL', ml_per_barrel=10000, potion_type=[0, 0, 0, 1], price=750, quantity=10), 
  Barrel(sku='LARGE_BLUE_BARREL', ml_per_barrel=10000, potion_type=[0, 0, 1, 0], price=600, quantity=30), 
  Barrel(sku='LARGE_GREEN_BARREL', ml_per_barrel=10000, potion_type=[0, 1, 0, 0], price=400, quantity=30),
 Barrel(sku='LARGE_RED_BARREL', ml_per_barrel=10000, potion_type=[1, 0, 0, 0], price=500, quantity=30)]
 """
+
+
 
 #dont need to reference potion quantity 
 """
