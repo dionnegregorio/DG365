@@ -100,7 +100,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
     elif gold_total >= 100 and current_cap > 100:
         for barrel in wholesale_catalog:
-            if barrel.sku == "SMALL_RED_BARREL" and red_ml < 10000 and gold_total >= 100:
+            if barrel.sku == "SMALL_RED_BARREL" and red_ml < 3000 and gold_total >= 100:
                 barrels_can_buy = gold_total // barrel.price 
                 if barrels_can_buy > 10:
                     barrels_can_buy = 10
@@ -109,7 +109,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "sku": "SMALL_RED_BARREL",
                         "quantity": barrels_can_buy,
                         })
-            elif barrel.sku == "SMALL_GREEN_BARREL" and green_ml < 10000 and gold_total >= 100:
+            elif barrel.sku == "SMALL_GREEN_BARREL" and green_ml < 3000 and gold_total >= 100:
                 barrels_can_buy = gold_total // barrel.price 
                 if barrels_can_buy > 10:
                     barrels_can_buy = 10
@@ -118,7 +118,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                             "sku": "SMALL_GREEN_BARREL",
                             "quantity": barrels_can_buy,
                             })
-            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 10000 and gold_total >= 120:
+            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 3000 and gold_total >= 120:
                 barrels_can_buy = gold_total // barrel.price 
                 if barrels_can_buy > 10:
                     barrels_can_buy = 10
