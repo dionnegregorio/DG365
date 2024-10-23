@@ -104,29 +104,30 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 barrels_can_buy = gold_total // barrel.price 
                 if barrels_can_buy > 10:
                     barrels_can_buy = 10
-                    gold_total -= (barrels_can_buy * barrel.price)
-                    to_buy_list.append({
+                gold_total -= (barrels_can_buy * barrel.price)
+                to_buy_list.append({
                         "sku": "SMALL_RED_BARREL",
                         "quantity": barrels_can_buy,
                         })
+                
             elif barrel.sku == "SMALL_GREEN_BARREL" and green_ml < 3000 and gold_total >= 100:
                 barrels_can_buy = gold_total // barrel.price 
                 if barrels_can_buy > 10:
                     barrels_can_buy = 10
-                    gold_total -= (barrels_can_buy * barrel.price)
-                    to_buy_list.append({
-                            "sku": "SMALL_GREEN_BARREL",
-                            "quantity": barrels_can_buy,
-                            })
-            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 3000 and gold_total >= 120:
+                gold_total -= (barrels_can_buy * barrel.price)
+                to_buy_list.append({
+                        "sku": "SMALL_GREEN_BARREL",
+                        "quantity": barrels_can_buy,
+                        })
+            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 4000 and gold_total >= 120:
                 barrels_can_buy = gold_total // barrel.price 
                 if barrels_can_buy > 10:
                     barrels_can_buy = 10
-                    gold_total -= (barrels_can_buy * barrel.price)
-                    to_buy_list.append({
-                            "sku": "SMALL_BLUE_BARREL",
-                            "quantity": barrels_can_buy,
-                            })
+                gold_total -= (barrels_can_buy * barrel.price)
+                to_buy_list.append({
+                        "sku": "SMALL_BLUE_BARREL",
+                        "quantity": barrels_can_buy,
+                        })
 
                       
     print(f"Barrels to buy: {to_buy_list}")
