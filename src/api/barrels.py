@@ -88,8 +88,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     current_ml = red_ml + green_ml + blue_ml
     current_cap = inventory.ml_capacity - current_ml
 
-    print(gold_total)
-    print(current_cap)
+    print(f"total gold: {gold_total}")
+    print(f"current capacity: {current_cap}")
 
     #get current amount of red, green and blue potions
     #buy if ml is less than 500ml
