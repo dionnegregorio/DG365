@@ -37,10 +37,15 @@ def get_capacity_plan():
     capacity unit costs 1000 gold.
     """
 
-    return {
-        "potion_capacity": 0,
-        "ml_capacity": 0
-        }
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM catalog")).scalar()
+        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
+
+    if result == 50 and gold >= 2000:
+        return {
+            "potion_capacity": 1,
+            "ml_capacity": 1
+            }
 
 class CapacityPurchase(BaseModel):
     potion_capacity: int
