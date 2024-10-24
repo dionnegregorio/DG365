@@ -138,23 +138,22 @@ def get_bottle_plan():
 
         if potion_type[0] > 0: #if red 
             to_bottle_pure_red = red_ml // potion_type[0]  #divide by req amount
-            if to_bottle_pure_red > 5:
-                remaining_red = to_bottle_pure_red - 5
+            if to_bottle_pure_red > 10:
+                remaining_red = to_bottle_pure_red - 10
                 to_bottle_pure_red -= remaining_red
         if potion_type[1] > 0:
             to_bottle_pure_green = green_ml // potion_type[1] #divide by req amount
-            if to_bottle_pure_green > 5:
-                remaining_green = to_bottle_pure_green - 5
+            if to_bottle_pure_green > 10:
+                remaining_green = to_bottle_pure_green - 10
                 to_bottle_pure_green -= remaining_green
         if potion_type[2] > 0:
             to_bottle_pure_blue = blue_ml // potion_type[2]
-            if to_bottle_pure_blue > 5:
-                remaining_blue = to_bottle_pure_blue - 5
+            if to_bottle_pure_blue > 10:
+                remaining_blue = to_bottle_pure_blue - 10
                 to_bottle_pure_blue -= remaining_blue
             
 
-
-        if to_bottle_pure_red > 0 and potion_type[0] == 100:
+        if to_bottle_pure_red > 0 and potion_type[0] == 100: #red
             print(f"added {potion_type}, quantity: {to_bottle_pure_red}")
             to_mix.append({
                 "potion_type": potion_type,
@@ -167,7 +166,7 @@ def get_bottle_plan():
             continue
 
 
-        if to_bottle_pure_green > 0 and potion_type[1] == 100:
+        if to_bottle_pure_green > 0 and potion_type[1] == 100: #green
             print(f"added {potion_type}, quantity: {to_bottle_pure_green}")
             to_mix.append({
                 "potion_type": potion_type,
