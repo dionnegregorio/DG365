@@ -41,10 +41,11 @@ def get_capacity_plan():
         result = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM catalog")).scalar()
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar()
 
-    if result == 50 and gold >= 2000:
+    
+    if result >= 50 and gold >= 1000:
         return {
             "potion_capacity": 1,
-            "ml_capacity": 1
+            "ml_capacity": 0
             }
 
 class CapacityPurchase(BaseModel):
