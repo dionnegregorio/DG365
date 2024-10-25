@@ -119,7 +119,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "sku": "SMALL_GREEN_BARREL",
                         "quantity": barrels_can_buy,
                         })
-            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 4000 and gold_total >= 120:
+            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 3000 and gold_total >= 120:
                 barrels_can_buy = gold_total // barrel.price 
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5
