@@ -86,20 +86,14 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                                      FROM barrel_ledger
                                                     """)).first()
         
-    
-    inventory = result.first()
-    to_buy_list = []
-    red_ml = inventory.num_red_ml
-    green_ml = inventory.num_green_ml
-    blue_ml = inventory.num_blue_ml
-    gold_total = inventory.gold
-    ml_cap = 10000
-
     red_ml = result.red_ml
     green_ml = result.green_ml
     blue_ml = result.blue_ml
     dark_ml = result.dark_ml
     gold_total = result.gold
+
+    to_buy_list = []
+    ml_cap = 10000
 
 
     print(f"total gold: {gold_total}")

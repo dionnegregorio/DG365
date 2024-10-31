@@ -20,8 +20,11 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions to deliver: {potions_delivered} order_id: {order_id}")
 
-    #for each potion, if green, update inventory set num_green_potions = num_green_potion + potion.quantity
-    
+
+    """
+    get 
+    """
+
     ml_green = ml_red = ml_blue = ml_dark = 0
     deliv_red = 0
     deliv_green = 0
@@ -118,9 +121,11 @@ def get_bottle_plan():
     total_ml = red_ml + green_ml + blue_ml
     to_mix = []
 
+    
     """
-    get ml inventory from global inventory
-    get abount of red inventory from catalo
+    get ml inventory from ml ledger 
+    
+
     """
     print(f"red ml total: {red_ml}")
     print(f"green ml total: {green_ml}")
