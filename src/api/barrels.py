@@ -86,52 +86,72 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                                      FROM barrel_ledger
                                                     """)).first()
         
+    to_buy_list = []
+    ml_cap = 10000
     red_ml = result.red_ml
     green_ml = result.green_ml
     blue_ml = result.blue_ml
     dark_ml = result.dark_ml
     gold_total = result.gold
+    budget = 0
 
-    to_buy_list = []
-    ml_cap = 10000
+    if gold_total <= 100:
+        budget = gold_total
+    else:
+        budget = gold_total * 0.6
 
 
-    print(f"total gold: {gold_total}")
+    print(f"total gold budget: {budget}")
     print(f"current capacity: {ml_cap}")
 
-    if gold_total <= 0:
+    if budget <= 0:
         print("NOT ENOUGH GOLD")
         return []
     
-    elif gold_total >= 100 and ml_cap > 100:
+    elif budget >= 100 and ml_cap > 100:
 
         for barrel in wholesale_catalog:
+            """ 10000 / 3 - current red / green / blue
+                    barrels available to buy 
+            """
 
-            if barrel.sku == "SMALL_RED_BARREL" and red_ml < 500:
-                capacity = ml_cap // 3 - red_ml
-                barrels_can_buy = capacity // barrel.ml_per_barrel
+            if barrel.sku == "SMALL_RED_BARREL" and red_ml < 500 and budget >= 100:
+                capacity = ml_cap // 3 - red_ml 
+                available_barrels = capacity // barrel.ml_per_barrel
+                can_afford = budget // barrel.price
+                barrels_can_buy = min(available_barrels, can_afford)
+                budget -= barrel.price * barrels_can_buy
+
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5 #max buy 5 barrels
-                gold_total -= (barrels_can_buy * barrel.price)
+                budget -= (barrels_can_buy * barrel.price)
                 to_buy_list.append({
                         "sku": "SMALL_RED_BARREL",
                         "quantity": barrels_can_buy,
                         })
                 
-            elif barrel.sku == "SMALL_GREEN_BARREL" and green_ml < 500 and gold_total >= 100:
+            if barrel.sku == "SMALL_GREEN_BARREL" and green_ml < 500 and budget >= 100:
                 capacity = ml_cap // 3 - green_ml
-                barrels_can_buy = capacity // barrel.ml_per_barrel 
+                available_barrels = capacity // barrel.ml_per_barrel
+                can_afford = budget // barrel.price
+                barrels_can_buy = min(available_barrels, can_afford)
+                budget -= barrel.price * barrels_can_buy
+
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5
-                gold_total -= (barrels_can_buy * barrel.price)
+                budget -= (barrels_can_buy * barrel.price)
                 to_buy_list.append({
                         "sku": "SMALL_GREEN_BARREL",
                         "quantity": barrels_can_buy,
                         })
                 
-            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 500 and gold_total >= 120:
+            if barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 500 and budget >= 120:
                 capacity = ml_cap // 3 - blue_ml
-                barrels_can_buy = capacity // barrel.ml_per_barrel
+                available_barrels = capacity // barrel.ml_per_barrel
+                can_afford = budget // barrel.price
+                barrels_can_buy = min(available_barrels, can_afford)
+                budget -= barrel.price * barrels_can_buy
+
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5
                 gold_total -= (barrels_can_buy * barrel.price)
