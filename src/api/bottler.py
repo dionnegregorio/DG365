@@ -110,17 +110,13 @@ def get_bottle_plan():
         result = connection.execute(sqlalchemy.text("SELECT num_green_ml, num_red_ml, num_blue_ml, potion_capacity, ml_capacity FROM global_inventory"))
         potions = connection.execute(sqlalchemy.text("SELECT sku, quantity, potion_type FROM catalog ORDER BY id")).mappings()
 
+
     ml_inv = result.first()  
     red_ml = ml_inv.num_red_ml
     green_ml = ml_inv.num_green_ml
     blue_ml = ml_inv.num_blue_ml
     total_ml = red_ml + green_ml + blue_ml
     to_mix = []
-
-
-
-    
-
 
     """
     get ml inventory from global inventory

@@ -31,33 +31,38 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     delivered_green_ml = 0
     delivered_red_ml = 0
     delivered_blue_ml = 0
-    payed = 0
+    delivered_dark_ml = 0
+    gold = 0
 
     for barrel in barrels_delivered:
-        if barrel.sku == "SMALL_GREEN_BARREL":
-            delivered_green_ml += barrel.ml_per_barrel * barrel.quantity
-            payed += barrel.price * barrel.quantity
-            print(f"Added {delivered_green_ml} ml to green inventory")
-        if barrel.sku == "SMALL_RED_BARREL":
+        if barrel.potion_type == [1,0,0,0]:
             delivered_red_ml += barrel.ml_per_barrel * barrel.quantity
-            payed += barrel.price * barrel.quantity
+            gold -= barrel.price * barrel.quantity
             print(f"Added {delivered_red_ml} ml to red inventory")
-        if barrel.sku == "SMALL_BLUE_BARREL":
+        elif barrel.potion_type == [0,1,0,0]:
+            delivered_green_ml += barrel.ml_per_barrel * barrel.quantity
+            gold -= barrel.price * barrel.quantity
+            print(f"Added {delivered_green_ml} ml to green inventory")
+        elif barrel.potion_type == [0,0,1,0]:
             delivered_blue_ml += barrel.ml_per_barrel * barrel.quantity
-            payed += barrel.price * barrel.quantity
+            gold -= barrel.price * barrel.quantity
             print(f"Added {delivered_blue_ml} ml to blue inventory")
+        elif barrel.potion_type == [0,0,0,1]:
+            delivered_dark_ml += barrel.ml_per_barrel * barrel.quantity
+            gold -= barrel.price * barrel.quantity
+            print(f"Added {delivered_dark_ml} ml to dark inventory")
 
-    sql_to_execute = """ 
-                    UPDATE global_inventory 
-                    SET num_green_ml = num_green_ml + :green_ml,
-                        num_red_ml = num_red_ml + :red_ml,
-                        num_blue_ml = num_blue_ml + :blue_ml,
-                        gold = gold - :payed
-                    """
-    values = {'green_ml': delivered_green_ml, 'red_ml': delivered_red_ml, 'blue_ml': delivered_blue_ml, 'payed': payed}
+    sql2 = """
+            INSERT INTO barrel_ledger 
+                (red_ml, green_ml, blue_ml, dark_ml, gold)
+            VALUES 
+                (:red_ml, :green_ml, :blue_ml, :dark_ml, :gold)
+            """
+    
+    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, 'blue_ml': delivered_blue_ml, 'gold': gold }
 
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(sql_to_execute), values)
+        connection.execute(sqlalchemy.text(sql2), values)
 
     print(f"Added barrels")
     return "OK"
@@ -66,17 +71,21 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
-    """purchase a new small green potion barrel only if the potions 
-    in inventory is less than 10. Always mix all available green ml 
-     if any exists. Offer up for sale in the catalog only the amount 
-     of green potions that actually exist currently in inventory."""
+    """purchase barrels"""
     
     print(wholesale_catalog)
 
-    #get number of current green potions
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
-        #potion_quants = connection.execute(sqlalchemy.text("SELECT sku, quantity FROM catalog WHERE id = '1' OR id = '2' OR id = '3' ORDER BY id")).mappings()
+        result = connection.execute(sqlalchemy.text("""
+                                                    SELECT 
+                                                        SUM(red_ml) as red_ml,
+                                                        SUM(green_ml) as green_ml,
+                                                        SUM(blue_ml) as blue_ml,
+                                                        SUM(dark_ml) as dark_ml
+                                                        SUM(gold) as gold
+                                                     FROM barrel_ledger
+                                                    """)).first()
+        
     
     inventory = result.first()
     to_buy_list = []
@@ -84,26 +93,31 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     green_ml = inventory.num_green_ml
     blue_ml = inventory.num_blue_ml
     gold_total = inventory.gold
+    ml_cap = 10000
 
-    current_ml = red_ml + green_ml + blue_ml
-    current_cap = inventory.ml_capacity - current_ml
+    red_ml = result.red_ml
+    green_ml = result.green_ml
+    blue_ml = result.blue_ml
+    dark_ml = result.dark_ml
+    gold_total = result.gold
+
 
     print(f"total gold: {gold_total}")
-    print(f"current capacity: {current_cap}")
-
-    #get current amount of red, green and blue potions
-    #buy if ml is less than 500ml
+    print(f"current capacity: {ml_cap}")
 
     if gold_total <= 0:
         print("NOT ENOUGH GOLD")
         return []
     
-    elif gold_total >= 100 and current_cap > 100:
+    elif gold_total >= 100 and ml_cap > 100:
+
         for barrel in wholesale_catalog:
-            if barrel.sku == "SMALL_RED_BARREL" and red_ml < 500 and gold_total >= 100:
-                barrels_can_buy = gold_total // barrel.price 
+
+            if barrel.sku == "SMALL_RED_BARREL" and red_ml < 500:
+                capacity = ml_cap // 3 - red_ml
+                barrels_can_buy = capacity // barrel.ml_per_barrel
                 if barrels_can_buy > 5:
-                    barrels_can_buy = 5
+                    barrels_can_buy = 5 #max buy 5 barrels
                 gold_total -= (barrels_can_buy * barrel.price)
                 to_buy_list.append({
                         "sku": "SMALL_RED_BARREL",
@@ -111,7 +125,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         })
                 
             elif barrel.sku == "SMALL_GREEN_BARREL" and green_ml < 500 and gold_total >= 100:
-                barrels_can_buy = gold_total // barrel.price 
+                capacity = ml_cap // 3 - green_ml
+                barrels_can_buy = capacity // barrel.ml_per_barrel 
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5
                 gold_total -= (barrels_can_buy * barrel.price)
@@ -119,8 +134,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "sku": "SMALL_GREEN_BARREL",
                         "quantity": barrels_can_buy,
                         })
-            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 4000 and gold_total >= 120:
-                barrels_can_buy = gold_total // barrel.price 
+                
+            elif barrel.sku == "SMALL_BLUE_BARREL" and  blue_ml < 500 and gold_total >= 120:
+                capacity = ml_cap // 3 - blue_ml
+                barrels_can_buy = capacity // barrel.ml_per_barrel
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5
                 gold_total -= (barrels_can_buy * barrel.price)
@@ -140,14 +157,16 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 Barrel(sku='SMALL_GREEN_BARREL', ml_per_barrel=500, potion_type=[0, 1, 0, 0], price=100, quantity=10),
  Barrel(sku='SMALL_BLUE_BARREL', ml_per_barrel=500, potion_type=[0, 0, 1, 0], price=120, quantity=10), 
 
- Barrel(sku='MINI_RED_BARREL', ml_per_barrel=200, potion_type=[1, 0, 0, 0], price=60, quantity=1), 
- Barrel(sku='MINI_GREEN_BARREL', ml_per_barrel=200, potion_type=[0, 1, 0, 0], price=60, quantity=1), 
- Barrel(sku='MINI_BLUE_BARREL', ml_per_barrel=200, potion_type=[0, 0, 1, 0], price=60, quantity=1), 
-
  Barrel(sku='LARGE_DARK_BARREL', ml_per_barrel=10000, potion_type=[0, 0, 0, 1], price=750, quantity=10), 
+
  Barrel(sku='LARGE_BLUE_BARREL', ml_per_barrel=10000, potion_type=[0, 0, 1, 0], price=600, quantity=30), 
  Barrel(sku='LARGE_GREEN_BARREL', ml_per_barrel=10000, potion_type=[0, 1, 0, 0], price=400, quantity=30),
 Barrel(sku='LARGE_RED_BARREL', ml_per_barrel=10000, potion_type=[1, 0, 0, 0], price=500, quantity=30)]
+
+
+ Barrel(sku='MINI_RED_BARREL', ml_per_barrel=200, potion_type=[1, 0, 0, 0], price=60, quantity=1), 
+ Barrel(sku='MINI_GREEN_BARREL', ml_per_barrel=200, potion_type=[0, 1, 0, 0], price=60, quantity=1), 
+ Barrel(sku='MINI_BLUE_BARREL', ml_per_barrel=200, potion_type=[0, 0, 1, 0], price=60, quantity=1), 
 """
 
 #dont need to reference potion quantity 
