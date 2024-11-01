@@ -59,7 +59,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 (:red_ml, :green_ml, :blue_ml, :dark_ml, :gold)
             """
     
-    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, 'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml  'gold': gold }
+    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, 'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, 'gold': gold}
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql2), values)
