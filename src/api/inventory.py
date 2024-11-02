@@ -46,10 +46,10 @@ def get_capacity_plan():
     print(gold)
 
 
-    if result >= 50 and gold >= 1000:
+    if result >= 25 and result <= 100 and gold >= 1000:
         return {
             "potion_capacity": 1,
-            "ml_capacity": 0
+            "ml_capacity": 1
             }
 
 class CapacityPurchase(BaseModel):

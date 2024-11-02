@@ -77,14 +77,14 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("""
-                                                    SELECT 
-                                                        SUM(red_ml) as red_ml,
-                                                        SUM(green_ml) as green_ml,
-                                                        SUM(blue_ml) as blue_ml,
-                                                        SUM(dark_ml) as dark_ml,
-                                                        SUM(gold) as gold
-                                                     FROM barrel_ledger
-                                                    """)).first()
+            SELECT 
+                SUM(red_ml) as red_ml,
+                SUM(green_ml) as green_ml,
+                SUM(blue_ml) as blue_ml,
+                SUM(dark_ml) as dark_ml,
+                SUM(gold) as gold
+            FROM barrel_ledger
+            """)).first()
         
     to_buy_list = []
     ml_cap = 10000
@@ -100,7 +100,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     else:
         budget = gold_total * 0.6
 
-
     print(f"total gold budget: {budget}")
     print(f"current capacity: {ml_cap}")
 
@@ -111,9 +110,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     elif budget >= 100 and ml_cap > 500:
 
         for barrel in wholesale_catalog:
-            """ 10000 / 3 - current red / green / blue
-                    barrels available to buy 
-            """
 
             if barrel.sku == "SMALL_RED_BARREL" and red_ml < 500 and budget >= 100:
                 capacity = ml_cap // 3 - red_ml 
@@ -172,7 +168,6 @@ Barrel(sku='SMALL_GREEN_BARREL', ml_per_barrel=500, potion_type=[0, 1, 0, 0], pr
  Barrel(sku='SMALL_BLUE_BARREL', ml_per_barrel=500, potion_type=[0, 0, 1, 0], price=120, quantity=10), 
 
  Barrel(sku='LARGE_DARK_BARREL', ml_per_barrel=10000, potion_type=[0, 0, 0, 1], price=750, quantity=10), 
-
  Barrel(sku='LARGE_BLUE_BARREL', ml_per_barrel=10000, potion_type=[0, 0, 1, 0], price=600, quantity=30), 
  Barrel(sku='LARGE_GREEN_BARREL', ml_per_barrel=10000, potion_type=[0, 1, 0, 0], price=400, quantity=30),
 Barrel(sku='LARGE_RED_BARREL', ml_per_barrel=10000, potion_type=[1, 0, 0, 0], price=500, quantity=30)]
