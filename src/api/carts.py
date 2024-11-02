@@ -130,7 +130,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     #inputs are cart_id, item_sku, cart_item 
 
     sql_to_execute = """
-                    UPDATE catalog
+                    UPDATE potion_ledger
                     SET quantity = quantity - :quantity_catalog
                     WHERE sku = :sku;
 
@@ -162,12 +162,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     #get cart id and its quantity, potion and 
 
     sql_to_execute = """
-                    UPDATE global_inventory
-                    SET gold = gold + (cart_items.quantity * catalog.price)
-                    FROM catalog
-                    JOIN cart_items ON cart_items.item_sku = catalog.sku
-                    WHERE cart_items.cart_id = :cart_id;
-
                     UPDATE cart_items
                     SET paid = TRUE
                     WHERE cart_items.cart_id = :cart_id;
@@ -177,11 +171,10 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                     WHERE cart_items.cart_id = :cart_id;
                     """
     values = {'cart_id': cart_id}
-
     
     with db.engine.begin() as connection:
         item = connection.execute(sqlalchemy.text(sql_to_execute), values).mappings().fetchone()
-        price = connection.execute(sqlalchemy.text("SELECT price FROM catalog WHERE sku = :sku"), {'sku': item['item_sku']}).scalar()
+        price = connection.execute(sqlalchemy.text("SELECT price FROM potion_ledger WHERE sku = :sku"), {'sku': item['item_sku']}).scalar()
     
     sku = item['item_sku']
     quant = item['quantity']
@@ -193,7 +186,18 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     print(f"total cost: {cost}")
     print(f"total quantity: {quant}")
 
-    
+    sql2 = """
+            INSERT INTO transaction_ledger
+                (tran_type, amount, gold)
+            VALUES
+                (:tan_type, :amount, :gold)
+            """
+
+    val = {'tran_type': "Sell", 'amount': quant, 'gold': cost}
+
+    with db.engine.begin() as connection:
+        item = connection.execute(sqlalchemy.text(sql2), val)
+
     print(f"total_potions_bought: {quant} {sku} potions, total_gold_paid: {cost}")
     return {
         "total_potions_bought": quant, 

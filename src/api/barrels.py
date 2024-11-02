@@ -32,6 +32,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     delivered_red_ml = 0
     delivered_blue_ml = 0
     delivered_dark_ml = 0
+    total_barrels = 0
     gold = 0
 
     for barrel in barrels_delivered:
@@ -39,27 +40,37 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             delivered_red_ml += barrel.ml_per_barrel * barrel.quantity
             gold -= barrel.price * barrel.quantity
             print(f"Added {delivered_red_ml} ml to red inventory")
+            total_barrels += barrel.quantity
         elif barrel.potion_type == [0,1,0,0]:
             delivered_green_ml += barrel.ml_per_barrel * barrel.quantity
             gold -= barrel.price * barrel.quantity
             print(f"Added {delivered_green_ml} ml to green inventory")
+            total_barrels += barrel.quantity
         elif barrel.potion_type == [0,0,1,0]:
             delivered_blue_ml += barrel.ml_per_barrel * barrel.quantity
             gold -= barrel.price * barrel.quantity
             print(f"Added {delivered_blue_ml} ml to blue inventory")
+            total_barrels += barrel.quantity
         elif barrel.potion_type == [0,0,0,1]:
             delivered_dark_ml += barrel.ml_per_barrel * barrel.quantity
             gold -= barrel.price * barrel.quantity
             print(f"Added {delivered_dark_ml} ml to dark inventory")
+            total_barrels += barrel.quantity
+
 
     sql2 = """
             INSERT INTO barrel_ledger 
-                (red_ml, green_ml, blue_ml, dark_ml, gold)
+                (red_ml, green_ml, blue_ml, dark_ml)
             VALUES 
-                (:red_ml, :green_ml, :blue_ml, :dark_ml, :gold)
+                (:red_ml, :green_ml, :blue_ml, :dark_ml)
+
+            INSERT INTO transaction_ledger
+                (tran_type, amount, gold)
+            VALUES 
+                (:tran_type, :amount, :gold)
             """
     
-    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, 'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, 'gold': gold}
+    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, 'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, 'tran_type': "Buy", 'amount': total_barrels, 'gold': gold}
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql2), values)

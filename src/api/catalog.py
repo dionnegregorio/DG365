@@ -11,19 +11,19 @@ def get_catalog():
     Each unique item combination must have only a single price.
     """
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM catalog")).mappings()
+        result = connection.execute(sqlalchemy.text("SELECT * FROM potion_ledger")).mappings()
     
 
     potions_for_sale = []
 
-    for row in result:
-        if row["quantity"] > 0:
+    for potion in result:
+        if potion.quantity > 0:
             potions_for_sale.append({
-                "sku": row["sku"],
-                "name": row["name"],
-                "quantity": row["quantity"],
-                "price": row["price"],
-                "potion_type": row["potion_type"],
+                "sku": potion.sku,
+                "name": potion.name,
+                "quantity": potion.quantity,
+                "price": potion.price,
+                "potion_type": [potion.red, potion.green, potion.blue, potion.dark]
             })
 
     for entry in potions_for_sale:

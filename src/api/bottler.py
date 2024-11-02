@@ -20,11 +20,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions to deliver: {potions_delivered} order_id: {order_id}")
 
-
-    """
-    get 
-    """
-
     ml_green = ml_red = ml_blue = ml_dark = 0
     deliv_red = 0
     deliv_green = 0
@@ -40,30 +35,30 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         red = potion.potion_type[0] * potion.quantity
         green = potion.potion_type[1] *  potion.quantity
         blue = potion.potion_type[2] * potion.quantity
-        #dark = potion.potion_type[3] * potion.quantity
+        dark = potion.potion_type[3] * potion.quantity
         
         match potion.potion_type:
             case [100,0,0,0]:
                 deliv_red += potion.quantity
-                ml_red += red
+                ml_red -= red
             case [0,100,0,0]:
                 deliv_green += potion.quantity
-                ml_green += green
+                ml_green -= green
             case [0,0,100,0]:
                 deliv_blue += potion.quantity
-                ml_blue += blue   
+                ml_blue -= blue   
             case [50,50,0,0]:
                 deliv_yellow += potion.quantity
-                ml_red += red
-                ml_green += green
+                ml_red -= red
+                ml_green -= green
             case [50,0,50,0]:
                 deliv_purp += potion.quantity
-                ml_red += red
-                ml_blue += blue
-            case [0,50,50,0]:
-                deliv_teal += potion.quantity
-                ml_green += green
-                ml_blue += blue
+                ml_red -= red
+                ml_blue -= blue
+            case [75,0,25,0]: 
+                deliv_orange += potion.quantity
+                ml_red -= red
+                ml_green -= green
 
 
     sql_to_execute = """
@@ -74,20 +69,20 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                         WHEN 'BLUE' THEN quantity + :deliv_blue
                         WHEN 'YELLOW' THEN quantity + :deliv_yellow
                         WHEN 'PURPLE' THEN quantity + :deliv_purp
-                        WHEN 'TEAL' THEN quantity + :deliv_teal
+                        WHEN 'ORANGE' THEN quantity + :deliv_teal
                         ELSE quantity
                     END
                     WHERE sku IN ('RED', 'GREEN', 'BLUE', 'YELLOW', 'PURPLE', 'TEAL');
 
-                    UPDATE global_inventory
-                    SET num_red_ml = num_red_ml - :ml_red,
-                        num_green_ml = num_green_ml - :ml_green,
-                        num_blue_ml = num_blue_ml - :ml_blue
+                    INSERT INTO barrel_ledger
+                        (red_ml, green_ml, blue_ml, dark_ml)
+                    VALUES
+                        (:ml_red, :ml_green, :ml_blue, :ml_dark)
                     """
 
     values = {'deliv_red': deliv_red, 'deliv_green': deliv_green, 'deliv_blue': deliv_blue,
                 'deliv_yellow': deliv_yellow, 'deliv_purp': deliv_purp, 'deliv_teal': deliv_teal,
-                'ml_red': ml_red , 'ml_green': ml_green, 'ml_blue': ml_blue
+                'ml_red': ml_red , 'ml_green': ml_green, 'ml_blue': ml_blue, 'ml_dark': ml_dark
               }
     
     with db.engine.begin() as connection:
