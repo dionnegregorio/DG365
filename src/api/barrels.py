@@ -95,6 +95,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 SUM(dark_ml) as dark_ml
             FROM barrel_ledger
             """)).first()
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
         
     to_buy_list = []
     ml_cap = 10000
@@ -102,13 +103,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     green_ml = result.green_ml
     blue_ml = result.blue_ml
     dark_ml = result.dark_ml
-    gold_total = result.gold
+    gold_total = gold
     budget = 0
 
     if gold_total <= 100:
         budget = gold_total
     else:
-        budget = gold_total * 0.6
+        budget = int(gold_total * 0.6)
 
     print(f"total gold budget: {budget}")
     print(f"current capacity: {ml_cap}")
@@ -128,6 +129,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 barrels_can_buy = min(available_barrels, can_afford)
                 budget -= barrel.price * barrels_can_buy
 
+                print(barrels_can_buy)
+
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5 #max buy 5 barrels
                 budget -= (barrels_can_buy * barrel.price)
@@ -143,6 +146,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 barrels_can_buy = min(available_barrels, can_afford)
                 budget -= barrel.price * barrels_can_buy
 
+                print(barrels_can_buy)
+
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5
                 budget -= (barrels_can_buy * barrel.price)
@@ -157,6 +162,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 can_afford = budget // barrel.price
                 barrels_can_buy = min(available_barrels, can_afford)
                 budget -= barrel.price * barrels_can_buy
+
+                print(barrels_can_buy)
 
                 if barrels_can_buy > 5:
                     barrels_can_buy = 5
