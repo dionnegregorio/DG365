@@ -23,8 +23,6 @@ def get_inventory():
         potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).scalar()
         gold_total = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
     
-
-
     print(f"Total potions: {potions}, total ml: {barrel_total}, total gold: {gold_total}")
     return {"number_of_potions": potions, "ml_in_barrels": barrel_total, "gold": gold_total}
 
@@ -63,4 +61,17 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     capacity unit costs 1000 gold.
     """
 
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text(
+            """
+            INSERT INTO capacity_ledger
+                (potion_capacity, ml_capacity)
+            VALUES 
+                (:potion, :ml)
+            """
+        ),{'potion': capacity_purchase.potion_capacity, 'ml': capacity_purchase.ml_capacity})
+
+    print(capacity_purchase.potion_capacity)
+    print(capacity_purchase.ml_capacity)
+    
     return "OK"
