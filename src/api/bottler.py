@@ -88,7 +88,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
-    print(f"delivered: {deliv_red} red, {deliv_green} green, {deliv_blue} blue, {deliv_yellow} yellow, {deliv_purp} purple, {deliv_teal} teal")
+    print(f"delivered: {deliv_red} red, {deliv_green} green, {deliv_blue} blue, {deliv_yellow} yellow, {deliv_purp} purple")
 
     return "successfully delivered"
 
