@@ -65,7 +65,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 (:red_ml, :green_ml, :blue_ml, :dark_ml)
 
             INSERT INTO transaction_ledger
-                (tran_type, amount, gold)
+                (tran_type, amount, total_gold)
             VALUES 
                 (:tran_type, :amount, :gold)
             """
@@ -93,7 +93,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 SUM(green_ml) as green_ml,
                 SUM(blue_ml) as blue_ml,
                 SUM(dark_ml) as dark_ml,
-                SUM(gold) as gold
             FROM barrel_ledger
             """)).first()
         

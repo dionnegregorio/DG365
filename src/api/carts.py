@@ -188,12 +188,12 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     sql2 = """
             INSERT INTO transaction_ledger
-                (tran_type, amount, gold)
+                (tran_type, amount, total_gold)
             VALUES
                 (:tan_type, :amount, :gold)
             """
 
-    val = {'tran_type': "Sell", 'amount': quant, 'gold': cost}
+    val = {'tran_type': "Sell", 'amount': quant, 'total_gold': cost}
 
     with db.engine.begin() as connection:
         item = connection.execute(sqlalchemy.text(sql2), val)
