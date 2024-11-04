@@ -26,11 +26,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     deliv_blue = 0
     deliv_purp = 0
     deliv_yellow = 0
-    deliv_teal = 0
+    deliv_orange = 0
     
     for potion in potions_delivered:
         print(f"potion: {potion.potion_type}, quantity: {potion.quantity}")
-        print(potion.quantity)
 
         red = potion.potion_type[0] * potion.quantity
         green = potion.potion_type[1] *  potion.quantity
@@ -62,17 +61,17 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 
 
     sql_to_execute = """
-                    UPDATE catalog
+                    UPDATE potion_ledger
                     SET quantity = CASE sku
                         WHEN 'RED' THEN quantity + :deliv_red
                         WHEN 'GREEN' THEN quantity + :deliv_green
                         WHEN 'BLUE' THEN quantity + :deliv_blue
                         WHEN 'YELLOW' THEN quantity + :deliv_yellow
                         WHEN 'PURPLE' THEN quantity + :deliv_purp
-                        WHEN 'ORANGE' THEN quantity + :deliv_teal
+                        WHEN 'ORANGE' THEN quantity + :deliv_orange
                         ELSE quantity
                     END
-                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'YELLOW', 'PURPLE', 'TEAL');
+                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'YELLOW', 'PURPLE', 'ORANGE', 'DARK');
 
                     INSERT INTO barrel_ledger
                         (red_ml, green_ml, blue_ml, dark_ml)
@@ -81,7 +80,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                     """
 
     values = {'deliv_red': deliv_red, 'deliv_green': deliv_green, 'deliv_blue': deliv_blue,
-                'deliv_yellow': deliv_yellow, 'deliv_purp': deliv_purp, 'deliv_teal': deliv_teal,
+                'deliv_yellow': deliv_yellow, 'deliv_purp': deliv_purp, 'deliv_orange': deliv_orange,
                 'ml_red': ml_red , 'ml_green': ml_green, 'ml_blue': ml_blue, 'ml_dark': ml_dark
               }
     
@@ -238,9 +237,9 @@ def get_bottle_plan():
                     "potion_type": potion_type,
                     "quantity": to_bottle_orange
                     })
-                red_ml -= to_bottle_yellow * 75
-                green_ml -= to_bottle_yellow * 25
-                can_bottle -= to_bottle_yellow
+                red_ml -= to_bottle_orange * 75
+                green_ml -= to_bottle_orange * 25
+                can_bottle -= to_bottle_orange
                 continue
                 
 
