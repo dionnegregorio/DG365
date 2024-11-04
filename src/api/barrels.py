@@ -71,8 +71,11 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             """
     
     buy = "BUY"
+    ml = "ML"
     
-    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, 'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, 'tran_type': buy, 'amount': total_barrels, 'gold': gold}
+    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, \
+              'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, \
+              'tran_type': buy, 'amount': total_barrels, 'gold': gold }
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql2), values)
@@ -80,13 +83,25 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     print(f"Added barrels")
     return "OK"
 
+def get_budget(total_gold):
+
+    if total_gold <= 100:
+         return total_gold
+    else: 
+        total_gold = int(total_gold * .6)
+
+    return total_gold
+
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
+    print(f"wholesale_catalog {wholesale_catalog}")
 
-    """purchase barrels"""
-    
-    print(wholesale_catalog)
+    large_barrels = [barrel for barrel in wholesale_catalog if 'LARGE' in barrel.sku]
+    small_barrels = [barrel for barrel in wholesale_catalog if 'SMALL' in barrel.sku]
+
+    print(f"large_barrels: {large_barrels}")
+    print(f"small_barrels: {small_barrels}")
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("""
@@ -94,9 +109,123 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 SUM(red_ml) as red_ml,
                 SUM(green_ml) as green_ml,
                 SUM(blue_ml) as blue_ml,
-                SUM(dark_ml) as dark_ml
+                SUM(dark_ml) as dark_ml,
+                SUM(red_ml + green_ml + blue_ml + dark_ml) as total
             FROM barrel_ledger
             """)).first()
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
+        current_capacity = connection.execute(sqlalchemy.text("SELECT SUM(amount) FROM capacity_ledger WHERE type = 'ML'")).scalar()
+        
+    to_buy_list = []
+    red_ml = result.red_ml
+    green_ml = result.green_ml
+    blue_ml = result.blue_ml
+    dark_ml = result.dark_ml
+
+    ml_cap = current_capacity - result.total
+    budget = get_budget(gold)
+    print(f"capacity: {ml_cap}")
+    print(f"budget: {budget}")
+
+    if (budget >= 100 and budget <= 1000) or ml_cap < 10000:
+        for barrel in small_barrels:
+
+            barrel_ml = 0
+            match barrel.potion_type:
+                case [1,0,0,0]:
+                    barrel_ml = red_ml
+                case [0,1,0,0]:
+                    barrel_ml = green_ml
+                case [0,0,1,0]:
+                    barrel_ml = blue_ml
+                case [0,0,0,1]:
+                    barrel_ml = dark_ml
+            
+            if barrel_ml >= 3000:
+                continue
+
+            if budget <= barrel.price:
+                continue
+
+            max_barrel_can_buy = budget // barrel.price
+
+            if max_barrel_can_buy > 6:
+                max_barrel_can_buy = 6
+            
+            to_buy_list.append({
+                "sku": barrel.sku,
+                "quantity": max_barrel_can_buy,
+                })
+            
+            budget -= barrel.price * max_barrel_can_buy
+            ml_cap -= barrel.ml_per_barrel * max_barrel_can_buy
+            print(f"Bought: {max_barrel_can_buy}, {barrel.sku}, ")
+            print(f"{ml_cap}ml space remaining")
+        
+
+    if budget > 1000 and ml_cap >= 10000:
+        for barrel in large_barrels:
+
+            barrel_ml = 0
+            match barrel.potion_type:
+                case [1,0,0,0]:
+                    barrel_ml = red_ml
+                case [0,1,0,0]:
+                    barrel_ml = green_ml
+                case [0,0,1,0]:
+                    barrel_ml = blue_ml
+                case [0,0,0,1]:
+                    barrel_ml = dark_ml
+            
+            if barrel_ml >= 10000:
+                continue
+
+            if budget < barrel.price or ml_cap < 10000:
+                continue
+            
+            max_barrel_can_buy = budget // barrel.price
+
+            if max_barrel_can_buy > 1 and ml_cap <= 10000:
+                max_barrel_can_buy = 1
+            else: 
+                max_barrel_can_buy = 0
+            
+            to_buy_list.append({
+                "sku": barrel.sku,
+                "quantity": max_barrel_can_buy,
+                })
+            
+            budget -= barrel.price * max_barrel_can_buy
+            ml_cap -= barrel.ml_per_barrel * max_barrel_can_buy
+            print(f"Bought: {max_barrel_can_buy}, {barrel.sku}")
+
+    print(to_buy_list)
+    return 
+
+    
+    
+    
+    
+""" 
+    #purchase barrels
+    
+    print(f"wholesale_catalog {wholesale_catalog}")
+
+    large_barrels = [barrel for barrel in wholesale_catalog if 'LARGE' in barrel.sku]
+    small_barrels = [barrel for barrel in wholesale_catalog if 'SMALL' in barrel.sku]
+
+    print(f"large_barrels: {large_barrels}")
+    print(f"small_barrels: {small_barrels}")
+
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("""
+""" SELECT 
+                SUM(red_ml) as red_ml,
+                SUM(green_ml) as green_ml,
+                SUM(blue_ml) as blue_ml,
+                SUM(dark_ml) as dark_ml
+            FROM barrel_ledger"""
+""")).first()
         gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
         
     to_buy_list = []
@@ -174,11 +303,28 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "sku": "SMALL_BLUE_BARREL",
                         "quantity": barrels_can_buy,
                         })
+                
+            if barrel.sku == "LARGE_DARK_BARREL" and dark_ml < 500 and budget >= 750 and capacity >= 10000:
+                capacity = ml_cap // 3 - dark_ml
+                available_barrels = capacity // barrel.ml_per_barrel
+                can_afford = budget // barrel.price
+                barrels_can_buy = min(available_barrels, can_afford)
+                budget -= barrel.price * barrels_can_buy
+
+                print(barrels_can_buy)
+
+                if barrels_can_buy > 5:
+                    barrels_can_buy = 5
+                budget -= (barrels_can_buy * barrel.price)
+                to_buy_list.append({
+                        "sku": "LARGE_DARK_BARREL",
+                        "quantity": barrels_can_buy,
+                        })
 
                       
     print(f"Barrels to buy: {to_buy_list}")
 
-    return to_buy_list
+    return to_buy_list"""
 
 
 """
@@ -214,3 +360,18 @@ ml= column['quantity']
               print(column["quantity"])
                 blue_ml = column['quantity']
     """
+
+
+"""
+if budget > 1000:
+    for barrel in large_barrels:
+        if budget < barrel.priceL
+            continue
+        
+        max_barrel_can_buy = budget //barrel.price
+
+        if max_barrel_can_buy > :
+            max_barrel_can_buy = barrel.quantity
+
+"""
+
