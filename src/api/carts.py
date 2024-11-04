@@ -193,7 +193,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 (:tan_type, :amount, :gold)
             """
 
-    val = {'tran_type': "Sell", 'amount': quant, 'total_gold': cost}
+    sell = "SELL"
+
+    val = {'tran_type': sell, 'amount': quant, 'total_gold': cost}
 
     with db.engine.begin() as connection:
         item = connection.execute(sqlalchemy.text(sql2), val)
