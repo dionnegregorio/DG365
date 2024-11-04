@@ -174,7 +174,7 @@ def get_bottle_plan():
                 print(f"{red_ml}ml of red remaining")
                 can_bottle -= to_bottle_pure_red
                 to_bottle_pure_red = red_ml // 50 
-                print(to_bottle_pure_red)
+                print(f"{to_bottle_pure_red} 50% red potions available")
                 continue
 
             if to_bottle_pure_green > 0 and green_needed == 100: #green
@@ -184,10 +184,10 @@ def get_bottle_plan():
                     "quantity": to_bottle_pure_green
                 })
                 green_ml -= to_bottle_pure_green * 100
-                print(f"{green_ml}ml of red remaining")
+                print(f"{green_ml}ml of green remaining")
                 can_bottle -= to_bottle_pure_green
                 to_bottle_pure_green = green_ml // 50
-                print(to_bottle_pure_green)
+                print(f"{to_bottle_pure_green} 50% green potions availble")
                 continue
 
 
@@ -215,7 +215,7 @@ def get_bottle_plan():
                 can_bottle -= to_bottle_pure_blue
 
                 to_bottle_pure_blue = blue_ml // 50
-                print(f"{to_bottle_pure_blue} blue potions")
+                print(f"{to_bottle_pure_blue} 50% blue potions available")
                 continue
 
             if to_bottle_pure_red > 0 and to_bottle_pure_blue > 0 and green_needed == 0: #purple
