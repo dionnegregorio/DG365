@@ -174,10 +174,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     barrel_ml = green_ml
                 case [0,0,1,0]:
                     barrel_ml = blue_ml
-            """case [0,0,0,1]:
-                    barrel_ml = dark_ml"""
+                case [0,0,0,1]:
+                    barrel_ml = dark_ml
             
-            if barrel_ml >= 10000:
+            if barrel_ml >= 3000:
                 continue
 
             if budget < barrel.price or ml_cap < 10000:
