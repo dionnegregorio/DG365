@@ -190,7 +190,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             INSERT INTO transaction_ledger
                 (tran_type, amount, total_gold)
             VALUES
-                (:tran_type, :amount, :gold)
+                (:tran_type, :amount, :total_gold)
             """
 
     sell = "SELL"
