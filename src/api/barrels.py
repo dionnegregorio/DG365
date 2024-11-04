@@ -67,7 +67,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             INSERT INTO transaction_ledger
                 (tran_type, amount, total_gold)
             VALUES 
-                (:tran_type, :amount, :gold)
+                (:tran_type, :amount, :total_gold)
             """
     
     buy = "BUY"
@@ -75,7 +75,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     
     values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, \
               'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, \
-              'tran_type': buy, 'amount': total_barrels, 'gold': gold }
+              'tran_type': buy, 'amount': total_barrels, 'total_gold': gold }
 
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql2), values)
@@ -174,8 +174,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     barrel_ml = green_ml
                 case [0,0,1,0]:
                     barrel_ml = blue_ml
-                case [0,0,0,1]:
-                    barrel_ml = dark_ml
+            """case [0,0,0,1]:
+                    barrel_ml = dark_ml"""
             
             if barrel_ml >= 10000:
                 continue
