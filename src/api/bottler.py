@@ -235,7 +235,7 @@ def get_bottle_plan():
                 can_bottle -= to_bottle_purple
                 continue
 
-            if to_bottle_pure_red > 0 and to_bottle_pure_green == 25 and blue_needed == 0:
+            if to_bottle_pure_red > 0 and to_bottle_pure_green > 0 and blue_needed == 0:
                 to_bottle_orange = min(to_bottle_pure_green, to_bottle_pure_red, can_bottle)
                 print(f"added {potion_type}, quantity: {to_bottle_orange}")
                 to_mix.append({
