@@ -200,7 +200,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             print(f"Bought: {max_barrel_can_buy}, {barrel.sku}")
 
     print(to_buy_list)
-    return 
+    return to_buy_list
 
     
     
