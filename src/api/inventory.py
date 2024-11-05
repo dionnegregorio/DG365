@@ -37,7 +37,7 @@ def get_capacity_plan():
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).scalar()
-        gold = connection.execute(sqlalchemy.text("SELECT SUM(gold) FROM transaction_ledger")).scalar()
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
 
     print(result)
     print(gold)
