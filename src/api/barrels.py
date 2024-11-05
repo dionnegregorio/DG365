@@ -127,7 +127,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(f"capacity: {ml_cap}")
     print(f"budget: {budget}")
 
-    if (budget >= 100 and budget <= 1000) or ml_cap < 10000:
+    if (budget >= 100 and budget <= 1000) or ml_cap <= 10000:
         for barrel in small_barrels:
 
             barrel_ml = 0
@@ -163,7 +163,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             print(f"{ml_cap}ml space remaining")
         
 
-    if budget > 1000 and ml_cap >= 10000:
+    if budget > 1000 and ml_cap > 10000:
         for barrel in large_barrels:
 
             barrel_ml = 0
