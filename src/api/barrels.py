@@ -58,12 +58,14 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             total_barrels += barrel.quantity
 
 
-    sql2 = """
+    sql = """
             INSERT INTO barrel_ledger 
                 (red_ml, green_ml, blue_ml, dark_ml)
             VALUES 
                 (:red_ml, :green_ml, :blue_ml, :dark_ml)
-
+            """
+    
+    sql2 = """
             INSERT INTO transaction_ledger
                 (tran_type, amount, total_gold)
             VALUES 
@@ -71,14 +73,14 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             """
     
     buy = "BUY"
-    ml = "ML"
     
-    values = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, \
-              'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, \
-              'tran_type': buy, 'amount': total_barrels, 'total_gold': gold }
+    values1 = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, \
+              'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml}
+    values2 = {'tran_type': buy, 'amount': total_barrels, 'total_gold': gold}
 
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text(sql2), values)
+        connection.execute(sqlalchemy.text(sql), values1)
+        connection.execute(sqlalchemy.text(sql2), values2)
 
     print(f"Added barrels")
     return "OK"
