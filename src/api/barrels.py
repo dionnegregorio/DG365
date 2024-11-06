@@ -132,6 +132,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     if (budget >= 100 and budget <= 1000) or ml_cap <= 10000:
         for barrel in small_barrels:
 
+            if ml_cap <= 0:
+                break
             barrel_ml = 0
             match barrel.potion_type:
                 case [1,0,0,0]:
@@ -153,6 +155,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
             if max_barrel_can_buy > 6:
                 max_barrel_can_buy = 6
+
+            available_barrel = ml_cap // barrel.ml_per_barrel
+
+            max_barrel_can_buy = min(max_barrel_can_buy, available_barrel)
             
             to_buy_list.append({
                 "sku": barrel.sku,
@@ -161,7 +167,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             
             budget -= barrel.price * max_barrel_can_buy
             ml_cap -= barrel.ml_per_barrel * max_barrel_can_buy
-            print(f"Bought: {max_barrel_can_buy}, {barrel.sku}, ")
+            print(f"Bought: {max_barrel_can_buy}, {barrel.sku}, total ml = {max_barrel_can_buy * barrel.ml_per_barrel} ")
             print(f"{ml_cap}ml space remaining")
         
 
@@ -199,7 +205,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             
             budget -= barrel.price * max_barrel_can_buy
             ml_cap -= barrel.ml_per_barrel * max_barrel_can_buy
-            print(f"Bought: {max_barrel_can_buy}, {barrel.sku}")
+            print(f"Bought: {max_barrel_can_buy}, {barrel.sku}, total ml = {max_barrel_can_buy * barrel.ml_per_barrel} ")
 
     print(to_buy_list)
     return to_buy_list
