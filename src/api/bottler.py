@@ -123,6 +123,7 @@ def get_bottle_plan():
         potions = connection.execute(sqlalchemy.text("""
                 SELECT sku, name, red, green, blue, dark, quantity 
                 FROM potion_ledger
+                ORDER BY quantity
                 """)).mappings()
         total_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).scalar()
         
@@ -162,8 +163,6 @@ def get_bottle_plan():
         print(to_bottle_pure_red)
         print(to_bottle_pure_green)
         print(to_bottle_pure_blue)
-
-        print(f"Can bottle{can_bottle} potions")
 
         if can_bottle > 0:
             if to_bottle_pure_red > 0 and red_needed == 100: #red

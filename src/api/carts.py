@@ -55,6 +55,23 @@ def search_orders(
     time is 5 total line items.
     """
 
+    #fetch from db
+
+    sql = """
+            SELECT potion_ledger.name, cart_items.quantity * potion_ledger.price as gold, 
+                carts.customer_name, carts.created_at as time
+            FROM cart_items
+            JOIN potion_ledger ON cart_items.item_sku = potion_ledger.sku
+            JOIN carts ON carts.id = cart_items.cart_id 
+            """
+
+    with db.engine.begin() as connection:
+        results = connection.execute(sqlalchemy.text(sql))
+    
+
+
+
+
     return {
         "previous": "",
         "next": "",

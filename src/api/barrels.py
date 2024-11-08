@@ -60,9 +60,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     sql = """
             INSERT INTO barrel_ledger 
-                (red_ml, green_ml, blue_ml, dark_ml)
+                (red_ml, green_ml, blue_ml, dark_ml, order_id)
             VALUES 
-                (:red_ml, :green_ml, :blue_ml, :dark_ml)
+                (:red_ml, :green_ml, :blue_ml, :dark_ml, :order_id)
             """
     
     sql2 = """
@@ -75,7 +75,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     buy = "BUY"
     
     values1 = {'red_ml': delivered_red_ml, 'green_ml': delivered_green_ml, \
-              'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml}
+              'blue_ml': delivered_blue_ml, 'dark_ml': delivered_dark_ml, 'order_id': order_id}
     values2 = {'tran_type': buy, 'amount': total_barrels, 'total_gold': gold}
 
     with db.engine.begin() as connection:
