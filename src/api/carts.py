@@ -55,8 +55,6 @@ def search_orders(
     time is 5 total line items.
     """
 
-    #fetch from db
-
     sql = """
             SELECT potion_ledger.name, cart_items.quantity * potion_ledger.price as gold, 
                 carts.customer_name, carts.created_at as time
@@ -64,27 +62,44 @@ def search_orders(
             JOIN potion_ledger ON cart_items.item_sku = potion_ledger.sku
             JOIN carts ON carts.id = cart_items.cart_id 
             """
+    
+    if sort_col == search_sort_options.customer_name:
+        order = "customer_name"
+    elif sort_col == search_sort_options.item_sku:
+        order = "item_sku"
+    elif sort_col == search_sort_options.line_item_total:
+        order = "gold"
+    elif sort_col == search_sort_options.timestamp:
+        order = "time"
+
+    if sort_order.value == "asc":
+        sort = "asc"
+    else:
+        sort = "desc"
+
+    sql += f"ORDER BY {order} {sort} "
+    sql += f"LIMIT 5 {('OFFSET ' + search_page) if search_page != '' else ''}"
+
 
     with db.engine.begin() as connection:
         results = connection.execute(sqlalchemy.text(sql))
-    
-
-
+        items = []
+        for i, row in enumerate(results):
+            items.append({
+                "line_item_id": i,
+                "item_sku": row.item_sku,
+                "customer_name": row.customer_name,
+                "line_item_total": row.gold,
+                "line_item_total": row.time,
+            })
 
 
     return {
-        "previous": "",
-        "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            }
-        ],
+        "previous": str(int(search_page) - 5) if search_page != '' and int(search_page) >= 5 else 0,
+        "next": str(int(search_page) + 5) if search_page != '' else 5,
+        "results": results
     }
+
 
 class Customer(BaseModel):
     customer_name: str
