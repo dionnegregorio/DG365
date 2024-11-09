@@ -56,7 +56,7 @@ def search_orders(
     """
 
     sql = """
-            SELECT potion_ledger.name, cart_items.quantity * potion_ledger.price as gold, 
+            SELECT potion_ledger.name as potion, cart_items.quantity * potion_ledger.price as gold, 
                 carts.customer_name, carts.created_at as time
             FROM cart_items
             JOIN potion_ledger ON cart_items.item_sku = potion_ledger.sku
@@ -77,8 +77,8 @@ def search_orders(
     else:
         sort = "desc"
 
-    sql += f"ORDER BY {order} {sort} "
-    sql += f"LIMIT 5 {('OFFSET ' + search_page) if search_page != '' else ''}"
+    sql += f" ORDER BY {order} {sort} "
+    sql += f" LIMIT 5 {('OFFSET ' + search_page) if search_page != '' else ''}"
 
 
     with db.engine.begin() as connection:
@@ -87,7 +87,7 @@ def search_orders(
         for i, row in enumerate(results):
             items.append({
                 "line_item_id": i,
-                "item_sku": row.item_sku,
+                "item_sku": row.potion,
                 "customer_name": row.customer_name,
                 "line_item_total": row.gold,
                 "line_item_total": row.time,
