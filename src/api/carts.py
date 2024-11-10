@@ -107,7 +107,7 @@ def search_orders(
                 "item_sku": row.potion,
                 "customer_name": row.customer_name,
                 "line_item_total": row.gold,
-                "line_item_total": row.time,
+                "timestamp": row.time,
             })
 
     search_page = int(search_page) if search_page else 0
