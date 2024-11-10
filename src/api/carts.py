@@ -71,6 +71,8 @@ def search_orders(
     elif potion_sku != "":
         sql += f" WHERE potion_ledger.sku ILIKE %{potion_sku}% "
 
+    print(customer_name, potion_sku)
+
     if sort_col is search_sort_options.customer_name:
         sort = "customer_name"
     elif sort_col is search_sort_options.item_sku:
@@ -80,14 +82,21 @@ def search_orders(
     elif sort_col is search_sort_options.timestamp:
         sort = "time"
 
+    print(sort)
+
     if sort_order.value == "asc":
         order = "asc"
     else:
         order = "desc"
 
+
+    print(order)
+    print(sql)
+
     sql += f" ORDER BY {sort} {order} "
     sql += f" LIMIT 5 {('OFFSET ' + search_page) if search_page != '' else ''}"
 
+    print(sql)
 
     with db.engine.begin() as connection:
         results = connection.execute(sqlalchemy.text(sql))
@@ -105,11 +114,12 @@ def search_orders(
     previous = str(int(search_page) - 5) if search_page != '' and int(search_page) >= 5 else 0
     next = str(search_page + 5) if search_page != '' else 5
         
+    print(items)
 
     return {
         "previous": previous,
         "next": next,
-        "results": results
+        "results": items
     }
 
 
