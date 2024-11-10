@@ -63,21 +63,29 @@ def search_orders(
             JOIN carts ON carts.id = cart_items.cart_id 
             """
     
-    if sort_col == search_sort_options.customer_name:
-        order = "customer_name"
-    elif sort_col == search_sort_options.item_sku:
-        order = "item_sku"
-    elif sort_col == search_sort_options.line_item_total:
-        order = "gold"
-    elif sort_col == search_sort_options.timestamp:
-        order = "time"
+    #search by name and/or potion
+    if customer_name != "" and potion_sku != "":
+        sql += f" WHERE carts.customer_name ILIKE %{customer_name} AND WHERE potion_ledger.sku ILIKE %{potion_sku}%"
+    elif customer_name != "":
+        sql += f" WHERE carts.customer_name ILIKE %{customer_name}% "
+    elif potion_sku != "":
+        sql += f" WHERE potion_ledger.sku ILIKE %{potion_sku}% "
+
+    if sort_col is search_sort_options.customer_name:
+        sort = "customer_name"
+    elif sort_col is search_sort_options.item_sku:
+        sort = "item_sku"
+    elif sort_col is search_sort_options.line_item_total:
+        sort = "gold"
+    elif sort_col is search_sort_options.timestamp:
+        sort = "time"
 
     if sort_order.value == "asc":
-        sort = "asc"
+        order = "asc"
     else:
-        sort = "desc"
+        order = "desc"
 
-    sql += f" ORDER BY {order} {sort} "
+    sql += f" ORDER BY {sort} {order} "
     sql += f" LIMIT 5 {('OFFSET ' + search_page) if search_page != '' else ''}"
 
 
