@@ -101,10 +101,14 @@ def search_orders(
                 "line_item_total": row.time,
             })
 
+    search_page = int(search_page) if search_page else 0
+    previous = str(int(search_page) - 5) if search_page != '' and int(search_page) >= 5 else 0
+    next = str(search_page + 5) if search_page != '' else 5
+        
 
     return {
-        "previous": str(int(search_page) - 5) if search_page != '' and int(search_page) >= 5 else 0,
-        "next": str(int(search_page) + 5) if search_page != '' else 5,
+        "previous": previous,
+        "next": next,
         "results": results
     }
 
