@@ -56,8 +56,8 @@ def search_orders(
     """
 
     sql = """
-            SELECT potion_ledger.name as potion, cart_items.quantity * potion_ledger.price as gold, 
-                carts.customer_name, carts.created_at as time
+            SELECT potion_ledger.name as potion, cart_items.quantity as quantity, potion_ledger.price as price, 
+                carts.customer_name as customer_name, carts.created_at as time
             FROM cart_items
             JOIN potion_ledger ON cart_items.item_sku = potion_ledger.sku
             JOIN carts ON carts.id = cart_items.cart_id 
@@ -104,9 +104,9 @@ def search_orders(
         for i, row in enumerate(results):
             items.append({
                 "line_item_id": i,
-                "item_sku": row.potion,
+                "item_sku": f"{row.quantity} {row.potion}",
                 "customer_name": row.customer_name,
-                "line_item_total": row.gold,
+                "line_item_total": row.quantity * row.price,
                 "timestamp": row.time,
             })
 
