@@ -89,9 +89,7 @@ def search_orders(
     else:
         order = "desc"
 
-
     print(order)
-    print(sql)
 
     sql += f" ORDER BY {sort} {order} "
     sql += f" LIMIT 5 {('OFFSET ' + search_page) if search_page != '' else ''}"
