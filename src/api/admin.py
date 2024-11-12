@@ -20,6 +20,11 @@ def reset():
         connection.execute(sqlalchemy.text("""UPDATE global_inventory SET gold = 100, num_green_ml = 0, num_red_ml = 0, num_blue_ml = 0;
                                           UPDATE catalog SET quantity = 0
                                             """))
-        #connection.execute(sqlalchemy.text("UPDATE potions_catalog SET quantity = 0"))
-   
+        connection.execute(sqlalchemy.text("""UPDATE potion_ledger SET quantity = 0;
+                                           DELETE FROM carts;
+                                           DELETE FROM cart_items;
+                                           DELETE FROM transaction_ledger WHERE id != 1;
+                                           DELETE FROM barrel_ledger
+                                           DELETE FROM capacity_ledger WHERE id > 2
+                                           """))
     return "OK"
