@@ -36,8 +36,8 @@ def get_capacity_plan():
     print("Starting capacity plan")
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).scalar()
-        gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
+        result = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).one()
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).one()
 
     print(result)
     print(gold)
