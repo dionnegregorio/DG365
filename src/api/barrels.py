@@ -114,7 +114,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 SUM(dark_ml) as dark_ml,
                 SUM(red_ml + green_ml + blue_ml + dark_ml) as total
             FROM barrel_ledger
-            """)).first()
+            """)).mappings().first()
         gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
         current_capacity = connection.execute(sqlalchemy.text("SELECT SUM(amount) FROM capacity_ledger WHERE type = 'ML'")).scalar()
         
@@ -131,6 +131,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     if (budget >= 100 and budget <= 1000) or ml_cap <= 10000:
         for barrel in small_barrels:
+            print(barrel.sku, barrel.price, barrel.potion_type)
+
+            if budget < barrel.price:
+                continue
 
             if ml_cap <= 0:
                 break
@@ -146,9 +150,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     barrel_ml = dark_ml
             
             if barrel_ml >= 3000:
-                continue
-
-            if budget <= barrel.price:
                 continue
 
             max_barrel_can_buy = budget // barrel.price
