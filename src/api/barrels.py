@@ -114,7 +114,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 SUM(dark_ml) as dark_ml,
                 SUM(red_ml + green_ml + blue_ml + dark_ml) as total
             FROM barrel_ledger
-            """)).mappings().first()
+            """)).mappings()
         gold = connection.execute(sqlalchemy.text("SELECT SUM(total_gold) FROM transaction_ledger")).scalar()
         current_capacity = connection.execute(sqlalchemy.text("SELECT SUM(amount) FROM capacity_ledger WHERE type = 'ML'")).scalar()
         
