@@ -25,7 +25,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     deliv_green = 0
     deliv_blue = 0
     deliv_purp = 0
-    deliv_yellow = 0
     deliv_orange = 0
     
     for potion in potions_delivered:
@@ -66,12 +65,11 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                         WHEN 'RED' THEN quantity + :deliv_red
                         WHEN 'GREEN' THEN quantity + :deliv_green
                         WHEN 'BLUE' THEN quantity + :deliv_blue
-                        WHEN 'YELLOW' THEN quantity + :deliv_yellow
                         WHEN 'PURPLE' THEN quantity + :deliv_purp
                         WHEN 'ORANGE' THEN quantity + :deliv_orange
                         ELSE quantity
                     END
-                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'YELLOW', 'PURPLE', 'ORANGE', 'DARK');
+                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'PURPLE', 'ORANGE');
 
                     INSERT INTO barrel_ledger
                         (red_ml, green_ml, blue_ml, dark_ml)
@@ -80,14 +78,14 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                     """
 
     values = {'deliv_red': deliv_red, 'deliv_green': deliv_green, 'deliv_blue': deliv_blue,
-                'deliv_yellow': deliv_yellow, 'deliv_purp': deliv_purp, 'deliv_orange': deliv_orange,
+                'deliv_purp': deliv_purp, 'deliv_orange': deliv_orange,
                 'ml_red': ml_red , 'ml_green': ml_green, 'ml_blue': ml_blue, 'ml_dark': ml_dark
               }
     
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(sql_to_execute), values)
 
-    print(f"delivered: {deliv_red} red, {deliv_green} green, {deliv_blue} blue, {deliv_yellow} yellow, {deliv_purp} purple")
+    print(f"delivered: {deliv_red} red, {deliv_green} green, {deliv_blue} blue, {deliv_purp} purple, {deliv_orange} orange")
 
     return "successfully delivered"
 
