@@ -149,7 +149,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 case [0,0,0,1]:
                     barrel_ml = dark_ml
             
-            if barrel_ml >= 3000:
+            if barrel_ml >= 500: ###
                 continue
 
             max_barrel_can_buy = budget // barrel.price
