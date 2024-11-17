@@ -121,7 +121,7 @@ def get_bottle_plan():
         potions = connection.execute(sqlalchemy.text("""
                 SELECT sku, name, red, green, blue, dark, quantity 
                 FROM potion_ledger
-                ORDER BY quantity
+                ORDER BY sku
                 """)).mappings()
         total_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).scalar()
         
