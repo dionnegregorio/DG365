@@ -133,6 +133,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     if (budget >= 100 and budget <= 1000) or ml_cap <= 10000:
         for barrel in small_barrels:
             print(barrel.sku, barrel.price, barrel.potion_type)
+            print(budget)
 
             if budget < barrel.price:
                 continue
@@ -157,8 +158,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
             available_barrel = ml_cap // barrel.ml_per_barrel
 
-            if max_barrel_can_buy > 2:
-                max_barrel_can_buy = 2
+            if max_barrel_can_buy > 3:
+                max_barrel_can_buy = 3
 
             max_barrel_can_buy = min(max_barrel_can_buy, available_barrel)
             
