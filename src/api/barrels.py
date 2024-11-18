@@ -87,7 +87,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
 def get_budget(total_gold):
 
-    if total_gold <= 500:
+    if total_gold <= 1000:
          return total_gold
     else: 
         total_gold = int(total_gold * .750)
@@ -153,13 +153,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             if barrel_ml >= 500: ###
                 continue
 
-
             max_barrel_can_buy = budget // barrel.price
 
-            if max_barrel_can_buy > 1: #only buy 1 for now
-                max_barrel_can_buy = 1
-
             available_barrel = ml_cap // barrel.ml_per_barrel
+
+            if max_barrel_can_buy > 2:
+                max_barrel_can_buy = 2
 
             max_barrel_can_buy = min(max_barrel_can_buy, available_barrel)
             
