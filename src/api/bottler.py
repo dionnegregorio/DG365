@@ -108,7 +108,7 @@ def get_bottle_plan():
 
     with db.engine.begin() as connection:
         
-        result = connection.execute(sqlalchemy.text("""
+        barrels = connection.execute(sqlalchemy.text("""
             SELECT 
                 SUM(red_ml) as red_ml,
                 SUM(green_ml) as green_ml,
@@ -129,10 +129,10 @@ def get_bottle_plan():
 
     to_mix = []
 
-    red_ml = result.red_ml
-    green_ml = result.green_ml
-    blue_ml = result.blue_ml
-    dark_ml = result.dark_ml
+    red_ml = barrels.red_ml
+    green_ml = barrels.green_ml
+    blue_ml = barrels.blue_ml
+    dark_ml = barrels.dark_ml
     can_bottle = capacity - total_potions
     
     print(f"current total potions: {total_potions}")
@@ -163,7 +163,7 @@ def get_bottle_plan():
         print(to_bottle_pure_blue)
 
         if can_bottle > 0:
-            if to_bottle_pure_red > 0 and red_needed == 100: #red
+            """if to_bottle_pure_red > 0 and red_needed == 100: #red
                 to_bottle_pure_red = min(to_bottle_pure_red, can_bottle)
                 print(f"added {potion_type}, quantity: {to_bottle_pure_red}")
                 to_mix.append({
@@ -175,9 +175,9 @@ def get_bottle_plan():
                 can_bottle -= to_bottle_pure_red
                 to_bottle_pure_red = red_ml // 50 
                 print(f"{to_bottle_pure_red} 50% red potions available")
-                continue
+                continue"""
 
-            if to_bottle_pure_green > 0 and green_needed == 100: #green
+            """if to_bottle_pure_green > 0 and green_needed == 100: #green
                 to_bottle_pure_green = min(to_bottle_pure_green, can_bottle)
                 print(f"added {potion_type}, quantity: {to_bottle_pure_green}")
                 to_mix.append({
@@ -190,7 +190,7 @@ def get_bottle_plan():
                 to_bottle_pure_green = green_ml // 50
                 print(f"{to_bottle_pure_green} 50% green potions availble")
                 continue
-
+"""
 
             '''if to_bottle_pure_red > 0 and to_bottle_pure_green > 0 and blue_needed == 0:  #yellow
                 to_bottle_yellow = min(to_bottle_pure_red, to_bottle_pure_green, can_bottle)
@@ -220,7 +220,7 @@ def get_bottle_plan():
                 print(f"{to_bottle_pure_blue} 50% blue potions available")
                 continue
 
-            if to_bottle_pure_red > 0 and to_bottle_pure_blue > 0 and green_needed == 0: #purple
+            """if to_bottle_pure_red > 0 and to_bottle_pure_blue > 0 and green_needed == 0: #purple
                 to_bottle_purple = min(to_bottle_pure_blue, to_bottle_pure_blue, can_bottle)
                 print(f"added {potion_type}, quantity: {to_bottle_purple}")
                 to_mix.append({
@@ -242,7 +242,7 @@ def get_bottle_plan():
                 red_ml -= to_bottle_orange * 75
                 green_ml -= to_bottle_orange * 25
                 can_bottle -= to_bottle_orange
-                continue
+                continue"""
                 
 
     print(f"bottle plan to mix: {to_mix}")
@@ -250,3 +250,15 @@ def get_bottle_plan():
 
 if __name__ == "__main__":
     print(get_bottle_plan())
+
+
+"""
+check how many potions i can make
+
+for each potion in the db 
+    get how many rgbd ingredients is needed
+    calculate how many of those are available
+    if available >= needed
+    add to the mix
+
+"""
