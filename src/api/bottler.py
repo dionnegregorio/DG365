@@ -177,7 +177,7 @@ def get_bottle_plan():
                 print(f"{to_bottle_pure_red} 50% red potions available")
                 continue
 
-            """if to_bottle_pure_green > 0 and green_needed == 100: #green
+            if to_bottle_pure_green > 0 and green_needed == 100: #green
                 to_bottle_pure_green = min(to_bottle_pure_green, can_bottle)
                 print(f"added {potion_type}, quantity: {to_bottle_pure_green}")
                 to_mix.append({
@@ -190,7 +190,7 @@ def get_bottle_plan():
                 to_bottle_pure_green = green_ml // 50
                 print(f"{to_bottle_pure_green} 50% green potions availble")
                 continue
-"""
+
 
             '''if to_bottle_pure_red > 0 and to_bottle_pure_green > 0 and blue_needed == 0:  #yellow
                 to_bottle_yellow = min(to_bottle_pure_red, to_bottle_pure_green, can_bottle)
