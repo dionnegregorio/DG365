@@ -151,15 +151,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 case [0,0,0,1]:
                     barrel_ml = dark_ml
             
-            if barrel_ml >= 500: ###
+            if barrel_ml >= 3000: ###
                 continue
 
             max_barrel_can_buy = budget // barrel.price
 
             available_barrel = ml_cap // barrel.ml_per_barrel
 
-            if max_barrel_can_buy > 3:
-                max_barrel_can_buy = 3
+            if max_barrel_can_buy > 6:
+                max_barrel_can_buy = 6
 
             max_barrel_can_buy = min(max_barrel_can_buy, available_barrel)
             
