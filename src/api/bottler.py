@@ -26,6 +26,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     deliv_blue = 0
     deliv_purp = 0
     deliv_orange = 0
+    deliv_dark = 0
     
     for potion in potions_delivered:
         print(f"potion: {potion.potion_type}, quantity: {potion.quantity}")
@@ -57,6 +58,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 deliv_orange += potion.quantity
                 ml_red -= red
                 ml_green -= green
+            case [0,0,0,100]:
+                deliv_dark += potion.quantity
+                ml_dark -= dark
+
 
 
     sql_to_execute = """
@@ -67,9 +72,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                         WHEN 'BLUE' THEN quantity + :deliv_blue
                         WHEN 'PURPLE' THEN quantity + :deliv_purp
                         WHEN 'ORANGE' THEN quantity + :deliv_orange
+                        WHEN 'DARK' THEN quantity + : :deliv_dark
                         ELSE quantity
                     END
-                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'PURPLE', 'ORANGE');
+                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'PURPLE', 'ORANGE', 'DARK');
 
                     INSERT INTO barrel_ledger
                         (red_ml, green_ml, blue_ml, dark_ml)
@@ -78,7 +84,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                     """
 
     values = {'deliv_red': deliv_red, 'deliv_green': deliv_green, 'deliv_blue': deliv_blue,
-                'deliv_purp': deliv_purp, 'deliv_orange': deliv_orange,
+                'deliv_purp': deliv_purp, 'deliv_orange': deliv_orange, 'deliv_dark': deliv_dark,
                 'ml_red': ml_red , 'ml_green': ml_green, 'ml_blue': ml_blue, 'ml_dark': ml_dark
               }
     
