@@ -72,10 +72,9 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                         WHEN 'BLUE' THEN quantity + :deliv_blue
                         WHEN 'PURPLE' THEN quantity + :deliv_purp
                         WHEN 'ORANGE' THEN quantity + :deliv_orange
-                        WHEN 'DARK' THEN quantity + : :deliv_dark
                         ELSE quantity
                     END
-                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'PURPLE', 'ORANGE', 'DARK');
+                    WHERE sku IN ('RED', 'GREEN', 'BLUE', 'PURPLE', 'ORANGE');
 
                     INSERT INTO barrel_ledger
                         (red_ml, green_ml, blue_ml, dark_ml)
@@ -84,7 +83,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                     """
 
     values = {'deliv_red': deliv_red, 'deliv_green': deliv_green, 'deliv_blue': deliv_blue,
-                'deliv_purp': deliv_purp, 'deliv_orange': deliv_orange, 'deliv_dark': deliv_dark,
+                'deliv_purp': deliv_purp, 'deliv_orange': deliv_orange,
                 'ml_red': ml_red , 'ml_green': ml_green, 'ml_blue': ml_blue, 'ml_dark': ml_dark
               }
     
