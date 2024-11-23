@@ -53,7 +53,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 deliv_purp += potion.quantity
                 ml_red -= red
                 ml_blue -= blue
-            case [75,0,25,0]: 
+            case [75,25,0,0]: 
                 deliv_orange += potion.quantity
                 ml_red -= red
                 ml_green -= green
@@ -100,152 +100,118 @@ def calculate_bottled_quantity(color_ml, color_needed, max_bottle = 10):
 @router.post("/plan")
 def get_bottle_plan():
     """
-    Go from barrel to bottle.
+    Evenly distributes potion bottling among all available recipes,
+    proportionally using resources and respecting bottling capacity.
     """
-    # Each bottle has a quantity of what proportion of red, blue, and
-    # green potion to add.
-    # Expressed in integers from 1 to 100 that must sum up to 100.
-
     with db.engine.begin() as connection:
-        
         barrels = connection.execute(sqlalchemy.text("""
             SELECT 
                 SUM(red_ml) as red_ml,
                 SUM(green_ml) as green_ml,
                 SUM(blue_ml) as blue_ml,
                 SUM(dark_ml) as dark_ml
-                FROM barrel_ledger
-            """)).first()        
+            FROM barrel_ledger
+        """)).first()
         
-        #potions = connection.execute(sqlalchemy.text("SELECT sku, quantity, potion_type FROM catalog ORDER BY id")).mappings()
         potions = connection.execute(sqlalchemy.text("""
-                SELECT sku, name, red, green, blue, dark, quantity 
-                FROM potion_ledger
-                ORDER BY sku
-                """)).mappings()
-        total_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).scalar()
+            SELECT sku, name, red, green, blue, dark, quantity 
+            FROM potion_ledger
+            ORDER BY sku
+        """)).mappings()
         
-        capacity = connection.execute(sqlalchemy.text("SELECT SUM(amount) as capacity FROM capacity_ledger WHERE type = 'POTION'")).scalar()
+        total_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM potion_ledger")).scalar()
+        capacity = connection.execute(sqlalchemy.text("""
+            SELECT SUM(amount) as capacity 
+            FROM capacity_ledger 
+            WHERE type = 'POTION'
+        """)).scalar()
 
     to_mix = []
-
-    red_ml = barrels.red_ml
-    green_ml = barrels.green_ml
-    blue_ml = barrels.blue_ml
-    dark_ml = barrels.dark_ml
+    red_ml = barrels.red_ml or 0
+    green_ml = barrels.green_ml or 0
+    blue_ml = barrels.blue_ml or 0
+    dark_ml = barrels.dark_ml or 0
     can_bottle = capacity - total_potions
-    
-    print(f"current total potions: {total_potions}")
-    print(f"can bottle: {can_bottle}")
 
-    print(f"red ml total: {red_ml}")
-    print(f"green ml total: {green_ml}")
-    print(f"blue ml total: {blue_ml}")
+    print(f"Current total potions: {total_potions}")
+    print(f"Bottling capacity available: {can_bottle}")
+    print(f"Ingredient inventory - Red: {red_ml}ml, Green: {green_ml}ml, Blue: {blue_ml}ml, Dark: {dark_ml}ml")
 
-
+    potion_plans = []
     for potion in potions:
-
         red_needed = potion.red
         green_needed = potion.green
         blue_needed = potion.blue
         dark_needed = potion.dark
-    
-        potion_type = [red_needed, green_needed, blue_needed, dark_needed]
-        print(potion_type)
 
-        to_bottle_pure_red = calculate_bottled_quantity(red_ml, red_needed)
-        to_bottle_pure_green = calculate_bottled_quantity(green_ml, green_needed)
-        to_bottle_pure_blue = calculate_bottled_quantity(blue_ml, blue_needed)
-        to_bottle_pure_dark = calculate_bottled_quantity(dark_ml, dark_needed)
+        current_potion = [red_needed, green_needed, blue_needed, dark_needed]
+        print(current_potion)
 
-        print(to_bottle_pure_red)
-        print(to_bottle_pure_green)
-        print(to_bottle_pure_blue)
+        total_needed = red_needed + green_needed + blue_needed + dark_needed
+        if total_needed != 100:
+            print(f"Skipping potion {potion.name} ({potion.sku}) - proportions do not sum to 100")
+            continue
 
-        if can_bottle > 0:
-            if to_bottle_pure_red > 0 and red_needed == 100: #red
-                to_bottle_pure_red = min(to_bottle_pure_red, can_bottle)
-                print(f"added {potion_type}, quantity: {to_bottle_pure_red}")
+        # Calculate max possible bottles for this potion
+        max_bottles = min(
+            red_ml // red_needed if red_needed > 0 else float('inf'),
+            green_ml // green_needed if green_needed > 0 else float('inf'),
+            blue_ml // blue_needed if blue_needed > 0 else float('inf'),
+            dark_ml // dark_needed if dark_needed > 0 else float('inf'),
+            can_bottle
+        )
+        if max_bottles > 0:
+            potion_plans.append({
+                "potion": potion,
+                "max_bottles": max_bottles
+            })
+
+    # Distribute bottling evenly across all potion types
+    while can_bottle > 0 and len(potion_plans) > 0:
+        total_max_bottles = sum(plan['max_bottles'] for plan in potion_plans)
+        if total_max_bottles == 0:
+            break
+
+        for plan in potion_plans[:]:
+            potion = plan["potion"]
+            red_needed = potion.red
+            green_needed = potion.green
+            blue_needed = potion.blue
+            dark_needed = potion.dark
+
+            # Proportionally allocate resources
+            proportion = plan["max_bottles"] / total_max_bottles
+            bottles_to_add = max(1, int(proportion * can_bottle))  # Ensure at least one bottle is made
+
+            bottles_to_add = min(
+                bottles_to_add,
+                plan["max_bottles"]
+            )
+
+            if bottles_to_add > 0:
+                print(f"Adding {bottles_to_add} bottles of {potion.name} ({potion.sku})")
                 to_mix.append({
-                    "potion_type": potion_type,
-                    "quantity": to_bottle_pure_red
+                    "potion_type": [red_needed, green_needed, blue_needed, dark_needed],
+                    "quantity": bottles_to_add
                 })
-                red_ml -= to_bottle_pure_red * 100
-                print(f"{red_ml}ml of red remaining")
-                can_bottle -= to_bottle_pure_red
-                to_bottle_pure_red = red_ml // 50 
-                print(f"{to_bottle_pure_red} 50% red potions available")
-                continue
 
-            if to_bottle_pure_green > 0 and green_needed == 100: #green
-                to_bottle_pure_green = min(to_bottle_pure_green, can_bottle)
-                print(f"added {potion_type}, quantity: {to_bottle_pure_green}")
-                to_mix.append({
-                    "potion_type": potion_type,
-                    "quantity": to_bottle_pure_green
-                })
-                green_ml -= to_bottle_pure_green * 100
-                print(f"{green_ml}ml of green remaining")
-                can_bottle -= to_bottle_pure_green
-                to_bottle_pure_green = green_ml // 50
-                print(f"{to_bottle_pure_green} 50% green potions availble")
-                continue
+                red_ml -= bottles_to_add * red_needed
+                green_ml -= bottles_to_add * green_needed
+                blue_ml -= bottles_to_add * blue_needed
+                dark_ml -= bottles_to_add * dark_needed
+                can_bottle -= bottles_to_add
 
+                plan["max_bottles"] -= bottles_to_add
 
-            '''if to_bottle_pure_red > 0 and to_bottle_pure_green > 0 and blue_needed == 0:  #yellow
-                to_bottle_yellow = min(to_bottle_pure_red, to_bottle_pure_green, can_bottle)
-                print(f"added {potion_type}, quantity: {to_bottle_yellow}")
-                to_mix.append({
-                    "potion_type": potion_type,
-                    "quantity": to_bottle_yellow
-                    })
-                red_ml -= to_bottle_yellow * 50
-                green_ml -= to_bottle_yellow * 50
-                can_bottle -= to_bottle_yellow
-                continue'''
-                            
+            # Remove potion plan if no more bottles can be made
+            if plan["max_bottles"] <= 0 or can_bottle <= 0:
+                potion_plans.remove(plan)
 
-            if to_bottle_pure_blue > 0 and blue_needed == 100: #blue
-                to_bottle_pure_blue = min(to_bottle_pure_blue, can_bottle)
-                print(f"added {potion_type}, quantity: {to_bottle_pure_blue}")
-                to_mix.append({
-                    "potion_type": potion_type,
-                    "quantity": to_bottle_pure_blue
-                })
-                blue_ml -= to_bottle_pure_blue * 100
-                print(f"{blue_ml}ml of blue ramaining")
-                can_bottle -= to_bottle_pure_blue
-
-                to_bottle_pure_blue = blue_ml // 50
-                print(f"{to_bottle_pure_blue} 50% blue potions available")
-                continue
-
-            if to_bottle_pure_red > 0 and to_bottle_pure_blue > 0 and green_needed == 0: #purple
-                to_bottle_purple = min(to_bottle_pure_blue, to_bottle_pure_blue, can_bottle)
-                print(f"added {potion_type}, quantity: {to_bottle_purple}")
-                to_mix.append({
-                "potion_type": potion_type,
-                "quantity": to_bottle_purple
-                })
-                red_ml -= to_bottle_purple * 50
-                blue_ml -= to_bottle_purple * 50
-                can_bottle -= to_bottle_purple
-                continue
-
-            if to_bottle_pure_red > 0 and to_bottle_pure_green > 0 and blue_needed == 0:
-                to_bottle_orange = min(to_bottle_pure_green, to_bottle_pure_red, can_bottle)
-                print(f"added {potion_type}, quantity: {to_bottle_orange}")
-                to_mix.append({
-                    "potion_type": potion_type,
-                    "quantity": to_bottle_orange
-                    })
-                red_ml -= to_bottle_orange * 75
-                green_ml -= to_bottle_orange * 25
-                can_bottle -= to_bottle_orange
-                continue
-                
-    print(f"bottle plan to mix: {to_mix}")
+    print(f"Bottling plan: {to_mix}")
+    print(f"Remaining inventory - Red: {red_ml}ml, Green: {green_ml}ml, Blue: {blue_ml}ml, Dark: {dark_ml}ml")
     return to_mix
+
+
 
 if __name__ == "__main__":
     print(get_bottle_plan())
