@@ -108,6 +108,7 @@ def get_bottle_plan():
     """
     Evenly distributes potion bottling among all available recipes,
     proportionally using resources and respecting bottling capacity.
+    Stops if the total number of potions exceeds 50.
     """
     with db.engine.begin() as connection:
         barrels = connection.execute(sqlalchemy.text("""
@@ -172,6 +173,8 @@ def get_bottle_plan():
                 "max_bottles": max_bottles
             })
 
+    total_created_potions = 0
+
     # Distribute bottling evenly across all potion types
     while can_bottle > 0 and len(potion_plans) > 0:
         total_max_bottles = sum(plan['max_bottles'] for plan in potion_plans)
@@ -206,8 +209,15 @@ def get_bottle_plan():
                 blue_ml -= bottles_to_add * blue_needed
                 dark_ml -= bottles_to_add * dark_needed
                 can_bottle -= bottles_to_add
+                total_created_potions += bottles_to_add
 
                 plan["max_bottles"] -= bottles_to_add
+
+            # Stop if the total number of potions exceeds 50
+            if total_created_potions >= 50:
+                print(f"Reached the maximum limit of 50 potions. Stopping.")
+                can_bottle = 0
+                break
 
             # Remove potion plan if no more bottles can be made
             if plan["max_bottles"] <= 0 or can_bottle <= 0:
@@ -216,7 +226,6 @@ def get_bottle_plan():
     print(f"Bottling plan: {to_mix}")
     print(f"Remaining inventory - Red: {red_ml}ml, Green: {green_ml}ml, Blue: {blue_ml}ml, Dark: {dark_ml}ml")
     return to_mix
-
 
 
 if __name__ == "__main__":
